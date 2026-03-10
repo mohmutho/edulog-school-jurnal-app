@@ -7,6 +7,12 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
+// Import komponen Shadcn yang sudah diinstall
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Label } from '@/Components/ui/label';
+import { Input } from '@/Components/ui/input';
+import { Button } from '@/Components/ui/button';
+
 defineProps({
     canResetPassword: {
         type: Boolean,
@@ -22,10 +28,10 @@ const form = useForm({
     remember: false,
 });
 
-const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
+const submitDummy = () => {
+    // Simulasi proses klik tombol
+    console.log('Dummy Data Submitted:', form.data());
+    alert('Ini masih UI dummy! Data yang diketik: ' + form.email);
 };
 </script>
 
@@ -33,68 +39,46 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
-        </div>
+        <Card class="border-0 shadow-xl bg-white/70 backdrop-blur-sm lg:border lg:shadow-sm lg:bg-white lg:backdrop-blur-none">
+            <CardHeader class="space-y-1">
+                <CardTitle class="text-2xl font-bold tracking-tight">Selamat Datang</CardTitle>
+                <CardDescription>
+                    Masukkan email dan password untuk mengakses dashboard.
+                </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+                <form @submit.prevent="submitDummy" class="space-y-4">
+                    <div class="space-y-2">
+                        <Label for="email">Email</Label>
+                        <Input 
+                            id="email" 
+                            type="email" 
+                            v-model="form.email" 
+                            placeholder="guru@sekolah.com" 
+                            required 
+                            autofocus 
+                        />
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <Label for="password">Password</Label>
+                            <a href="#" class="text-sm text-blue-600 hover:text-blue-500 font-medium">Lupa password?</a>
+                        </div>
+                        <Input 
+                            id="password" 
+                            type="password" 
+                            v-model="form.password" 
+                            required 
+                        />
+                    </div>
 
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
-                </label>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
+                    <Button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700">
+                        Masuk Sistem
+                    </Button>
+                </form>
+            </CardContent>
+        </Card>
     </GuestLayout>
 </template>
