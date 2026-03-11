@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 
 // Import komponen Shadcn yang sudah diinstall
@@ -66,7 +66,6 @@ const todaySchedules = [
 
 // 2. Logika untuk menentukan status berdasarkan waktu saat ini
 const getScheduleStatus = (timeString) => {
-    // Memecah "07:00 - 09:30"
     const [start, end] = timeString.split(' - ');
     
     const now = new Date();
@@ -78,28 +77,55 @@ const getScheduleStatus = (timeString) => {
     const [endH, endM] = end.split(':').map(Number);
     const endTotalMinutes = endH * 60 + endM;
 
+    // Batas akhir waktu pengisian (Jam 18:00)
+    const batasAkhirMinutes = 18 * 60;
+
+    let badgeLabel = '';
+    let badgeColor = '';
+
+    // A. Logika Label Status (Sesuai jam kelas sebenarnya)
     if (currentTotalMinutes < startTotalMinutes) {
-        return { label: 'Belum Dimulai', code: 'future', isActive: false };
+        badgeLabel = 'Belum Dimulai';
+        badgeColor = 'bg-slate-100 text-slate-600';
     } else if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
-        return { label: 'Sedang Berjalan', code: 'current', isActive: true };
+        badgeLabel = 'Sedang Berjalan';
+        badgeColor = 'bg-blue-100 text-blue-700';
     } else {
-        return { label: 'Selesai', code: 'past', isActive: false };
+        badgeLabel = 'Selesai';
+        badgeColor = 'bg-green-100 text-green-700';
     }
+
+    // B. Logika Tombol Aksi (Batas kelonggaran s/d jam 18:00)
+    let actionCode = '';
+    if (currentTotalMinutes < startTotalMinutes) {
+        actionCode = 'waiting'; // Sebelum kelas mulai -> Disabled
+    } else if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < batasAkhirMinutes) {
+        actionCode = 'fill'; // Sedang jalan ATAU sudah selesai tapi belum jam 18:00 -> Isi Jurnal
+    } else {
+        actionCode = 'view'; // Lewat jam 18:00 -> Hanya Lihat Presensi
+    }
+
+    return { 
+        badgeLabel, 
+        badgeColor, 
+        actionCode,
+        // Card hanya menyala biru/highlight saat jam kelas benar-benar sedang berlangsung
+        isActiveCard: currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes
+    };
 };
 
-// 3. Jadwal Dinamis yang akan bereaksi setiap kali currentTime berdetak
+// 3. Jadwal Dinamis yang akan bereaksi setiap detik
 const dynamicSchedules = computed(() => {
-    // Memanggil currentTime.value di dalam computed ini akan memicu Vue 
-    // untuk mengevaluasi ulang seluruh jadwal setiap 1 detik!
     const trigger = currentTime.value; 
     
     return todaySchedules.map(schedule => {
         const statusInfo = getScheduleStatus(schedule.time);
         return {
             ...schedule,
-            status: statusInfo.label,
-            statusCode: statusInfo.code, // 'future', 'current', atau 'past'
-            isActive: statusInfo.isActive
+            badgeLabel: statusInfo.badgeLabel,
+            badgeColor: statusInfo.badgeColor,
+            actionCode: statusInfo.actionCode,
+            isActiveCard: statusInfo.isActiveCard
         };
     });
 });
@@ -123,23 +149,20 @@ const dynamicSchedules = computed(() => {
         </div>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card v-for="schedule in dynamicSchedules" :key="schedule.id" :class="[schedule.isActive ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-slate-200']">
+            <Card v-for="schedule in dynamicSchedules" :key="schedule.id" :class="[schedule.isActiveCard ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-slate-200']">
                 <CardHeader class="pb-3">
                     <div class="flex justify-between items-start">
                         <CardTitle class="text-xl">{{ schedule.subject }}</CardTitle>
                         
-                        <span :class="{
-                            'bg-blue-100 text-blue-700': schedule.statusCode === 'current',
-                            'bg-slate-100 text-slate-600': schedule.statusCode === 'future',
-                            'bg-green-100 text-green-700': schedule.statusCode === 'past'
-                        }" class="px-2.5 py-0.5 rounded-full text-xs font-semibold">
-                            {{ schedule.status }}
+                        <span :class="schedule.badgeColor" class="px-2.5 py-0.5 rounded-full text-xs font-semibold">
+                            {{ schedule.badgeLabel }}
                         </span>
                     </div>
                     <CardDescription class="text-lg font-medium text-slate-700 mt-1">
                         Kelas: {{ schedule.classroom }}
                     </CardDescription>
                 </CardHeader>
+        
                 <CardContent>
                     <div class="flex items-center text-sm text-slate-500 mb-6">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -147,17 +170,21 @@ const dynamicSchedules = computed(() => {
                         </svg>
                         {{ schedule.time }} WIB
                     </div>
-                    <Button v-if="schedule.statusCode === 'current'" class="w-full bg-blue-600 hover:bg-blue-700">
-                        Isi Jurnal & Presensi
+                    
+                    <Button v-if="schedule.actionCode === 'fill'" as-child class="w-full bg-blue-600 hover:bg-blue-700">
+                        <Link href="/jurnal/create">
+                            Isi Jurnal & Presensi
+                        </Link>
                     </Button>
                     
-                    <Button v-else-if="schedule.statusCode === 'past'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50">
+                    <Button v-else-if="schedule.actionCode === 'view'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50">
                         Lihat Presensi
                     </Button>
                     
                     <Button v-else variant="secondary" disabled class="w-full bg-slate-100 text-slate-400">
                         Belum Waktunya
                     </Button>
+
                 </CardContent>
             </Card>
         </div>
