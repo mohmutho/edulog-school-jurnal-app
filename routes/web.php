@@ -10,8 +10,18 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    return Inertia::render('Dashboard', [
+        // Simulasi data yang dikirim dari Backend
+        'auth' => [
+            'user' => [
+                'name' => 'Mohammad Mutho',
+                'email' => 'mutho@smansa.sch.id',
+                'role' => 'Guru Informatika',
+                'gender' => 'L', // 'L' untuk Laki-laki (Bapak), 'P' untuk Perempuan (Ibu)
+            ]
+        ]
+    ]);
+})->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
