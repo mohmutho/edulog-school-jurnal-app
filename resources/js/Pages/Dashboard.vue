@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 
 // Import komponen Shadcn yang sudah diinstall
@@ -147,12 +147,16 @@ const dynamicSchedules = computed(() => {
                         </svg>
                         {{ schedule.time }} WIB
                     </div>
-                    <Button v-if="schedule.statusCode === 'current'" class="w-full bg-blue-600 hover:bg-blue-700">
-                        Isi Jurnal & Presensi
+                    <Button v-if="schedule.statusCode === 'current'" as-child class="w-full bg-blue-600 hover:bg-blue-700">
+                        <Link href="/jurnal/create">
+                            Isi Jurnal & Presensi
+                        </Link>
                     </Button>
                     
                     <Button v-else-if="schedule.statusCode === 'past'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50">
-                        Lihat Presensi
+                        <Link href="/jurnal/presensi">
+                            Lihat Presensi
+                        </Link>
                     </Button>
                     
                     <Button v-else variant="secondary" disabled class="w-full bg-slate-100 text-slate-400">

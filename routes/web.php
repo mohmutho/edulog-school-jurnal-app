@@ -29,4 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/jurnal/create', function () {
+    return Inertia::render('Journal/Create'); 
+})->name('jurnal.create');
+
 require __DIR__.'/auth.php';
