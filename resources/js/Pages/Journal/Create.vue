@@ -6,6 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Com
 import { Button } from '@/Components/ui/button';
 import { Textarea } from '@/Components/ui/textarea';
 import { ChevronLeft, Save } from 'lucide-vue-next';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/Components/ui/select';
 
 // Dummy Data Kelas (Nanti dari backend)
 const classInfo = {
@@ -22,6 +30,11 @@ const students = [
     { id: 3, nis: '1003', name: 'Dian Sastrowardoyo', gender: 'P' },
     { id: 4, nis: '1004', name: 'Eko Patrio', gender: 'L' },
     { id: 5, nis: '1005', name: 'Siti Aminah', gender: 'P' },
+    { id: 6, nis: '1006', name: 'Andi Prasetyo', gender: 'L' },
+    { id: 7, nis: '1007', name: 'Bunga Kusuma', gender: 'P' },
+    { id: 8, nis: '1008', name: 'Chandra Wijaya', gender: 'L' },
+    { id: 9, nis: '1009', name: 'Dewi Sartika', gender: 'P' },
+    { id: 10, nis: '1010', name: 'Ferry Gunawan', gender: 'L' }
 ];
 
 // Opsi Presensi dengan Warna Khusus untuk UX yang maksimal
@@ -34,8 +47,9 @@ const attendanceOptions = [
 
 // State Form
 const form = ref({
-    materi: '',
-    catatan: '',
+    kegiatan: '', // Tambahan baru untuk dropdown
+    materi: '',   // Sekarang menjadi opsional (Rincian Kegiatan)
+    catatan: '',  // Tetap ada
     attendances: {}
 });
 
@@ -75,37 +89,10 @@ const submitForm = () => {
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <div class="lg:col-span-5 space-y-6">
+            <div class="lg:col-span-7 space-y-6">
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Jurnal Mengajar</CardTitle>
-                        <CardDescription>Isi materi yang diajarkan hari ini.</CardDescription>
-                    </CardHeader>
-                    <CardContent class="space-y-4">
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-slate-700">Materi Pembelajaran <span class="text-red-500">*</span></label>
-                            <Textarea 
-                                v-model="form.materi" 
-                                placeholder="Contoh: Pengenalan HTML & CSS Dasar..." 
-                                class="min-h-30"
-                            />
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-medium text-slate-700">Catatan Khusus (Opsional)</label>
-                            <Textarea 
-                                v-model="form.catatan" 
-                                placeholder="Contoh: Proyektor di kelas redup, butuh perbaikan." 
-                                class="min-h-20"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div class="lg:col-span-7">
-                <Card class="h-full flex flex-col">
                     <CardHeader>
                         <div class="flex items-center justify-between">
                             <div>
@@ -121,7 +108,7 @@ const submitForm = () => {
                         </div>
                     </CardHeader>
                     
-                    <CardContent class="flex-1 overflow-y-auto pr-2 space-y-3">
+                    <CardContent class="space-y-3 max-h-140 overflow-y-auto pr-4">
                         <div v-for="(student, index) in students" :key="student.id" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3">
                             
                             <div class="flex items-center space-x-3">
@@ -134,13 +121,7 @@ const submitForm = () => {
 
                             <div class="flex space-x-2 ml-11 sm:ml-0">
                                 <label v-for="opt in attendanceOptions" :key="opt.code" class="cursor-pointer">
-                                    <input 
-                                        type="radio" 
-                                        :name="'attendance_' + student.id" 
-                                        :value="opt.code" 
-                                        v-model="form.attendances[student.id]" 
-                                        class="peer sr-only"
-                                    >
+                                    <input type="radio" :name="'attendance_' + student.id" :value="opt.code" v-model="form.attendances[student.id]" class="peer sr-only">
                                     <div :class="['w-9 h-9 flex items-center justify-center rounded-md text-sm font-bold border transition-all duration-200', opt.color]">
                                         {{ opt.code }}
                                     </div>
@@ -152,10 +133,57 @@ const submitForm = () => {
                 </Card>
             </div>
 
+            <div class="lg:col-span-5 space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Jurnal Mengajar</CardTitle>
+                        <CardDescription>Isi kegiatan dan materi hari ini.</CardDescription>
+                    </CardHeader>
+                    <CardContent class="space-y-5">
+                        
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-700">Jenis Kegiatan <span class="text-red-500">*</span></label>
+                            <Select v-model="form.kegiatan">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue placeholder="Pilih jenis kegiatan..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectItem value="Penjelasan Materi">Penjelasan Materi</SelectItem>
+                                        <SelectItem value="Praktikum">Praktikum</SelectItem>
+                                        <SelectItem value="Berdiskusi">Berdiskusi</SelectItem>
+                                        <SelectItem value="Ulangan Harian">Ulangan Harian</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-700">Rincian Kegiatan <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                            <Textarea 
+                                v-model="form.materi" 
+                                placeholder="Contoh: Menjelaskan pengulangan For dan While..." 
+                                class="min-h-20"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-slate-700">Catatan Khusus <span class="text-slate-400 font-normal">(Opsional)</span></label>
+                            <Textarea 
+                                v-model="form.catatan" 
+                                placeholder="Contoh: Proyektor mati, pertemuan depan butuh lab komputer." 
+                                class="min-h-20"
+                            />
+                        </div>
+
+                    </CardContent>
+                </Card>
+            </div>
+
         </div>
 
-        <div class="mt-6 flex justify-end">
-            <Button @click="submitForm" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 h-auto text-base font-semibold shadow-lg shadow-blue-500/30">
+        <div class="mt-8 flex lg:justify-end">
+            <Button @click="submitForm" class="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 h-auto text-base font-semibold shadow-lg shadow-blue-500/30">
                 <Save class="w-5 h-5 mr-2" />
                 Simpan Jurnal & Presensi
             </Button>
