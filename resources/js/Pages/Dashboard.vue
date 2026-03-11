@@ -42,25 +42,67 @@ onBeforeUnmount(() => {
     if (timeTimer) clearInterval(timeTimer);
 });
 
-//Data dummy jadwal hari ini (nanti diganti dengan data dari backend)
+//1. Data dummy jadwal hari ini (nanti diganti dengan data dari backend)
 const todaySchedules = [
     { 
         id: 1, 
         subject: 'Informatika', 
         classroom: 'XI-7', 
         time: '07:00 - 09:15', 
-        status: 'Sedang Berjalan',
-        isActive: true
     },
     { 
         id: 2, 
         subject: 'Informatika', 
         classroom: 'XI-8', 
-        time: '09:15 - 11:45', 
-        status: 'Belum Dimulai',
-        isActive: false
-    }
+        time: '09:15 - 11:45'
+    },
+    { 
+        id: 3, 
+        subject: 'Informatika', 
+        classroom: 'XI-9', 
+        time: '12:30 - 14:45' 
+    },
 ];
+
+// 2. Logika untuk menentukan status berdasarkan waktu saat ini
+const getScheduleStatus = (timeString) => {
+    // Memecah "07:00 - 09:30"
+    const [start, end] = timeString.split(' - ');
+    
+    const now = new Date();
+    const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+
+    const [startH, startM] = start.split(':').map(Number);
+    const startTotalMinutes = startH * 60 + startM;
+
+    const [endH, endM] = end.split(':').map(Number);
+    const endTotalMinutes = endH * 60 + endM;
+
+    if (currentTotalMinutes < startTotalMinutes) {
+        return { label: 'Belum Dimulai', code: 'future', isActive: false };
+    } else if (currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes) {
+        return { label: 'Sedang Berjalan', code: 'current', isActive: true };
+    } else {
+        return { label: 'Selesai', code: 'past', isActive: false };
+    }
+};
+
+// 3. Jadwal Dinamis yang akan bereaksi setiap kali currentTime berdetak
+const dynamicSchedules = computed(() => {
+    // Memanggil currentTime.value di dalam computed ini akan memicu Vue 
+    // untuk mengevaluasi ulang seluruh jadwal setiap 1 detik!
+    const trigger = currentTime.value; 
+    
+    return todaySchedules.map(schedule => {
+        const statusInfo = getScheduleStatus(schedule.time);
+        return {
+            ...schedule,
+            status: statusInfo.label,
+            statusCode: statusInfo.code, // 'future', 'current', atau 'past'
+            isActive: statusInfo.isActive
+        };
+    });
+});
 </script>
 
 <template>
@@ -81,11 +123,16 @@ const todaySchedules = [
         </div>
 
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card v-for="schedule in todaySchedules" :key="schedule.id" :class="[schedule.isActive ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-slate-200']">
+            <Card v-for="schedule in dynamicSchedules" :key="schedule.id" :class="[schedule.isActive ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-slate-200']">
                 <CardHeader class="pb-3">
                     <div class="flex justify-between items-start">
                         <CardTitle class="text-xl">{{ schedule.subject }}</CardTitle>
-                        <span :class="[schedule.isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600', 'px-2.5 py-0.5 rounded-full text-xs font-semibold']">
+                        
+                        <span :class="{
+                            'bg-blue-100 text-blue-700': schedule.statusCode === 'current',
+                            'bg-slate-100 text-slate-600': schedule.statusCode === 'future',
+                            'bg-green-100 text-green-700': schedule.statusCode === 'past'
+                        }" class="px-2.5 py-0.5 rounded-full text-xs font-semibold">
                             {{ schedule.status }}
                         </span>
                     </div>
@@ -100,13 +147,19 @@ const todaySchedules = [
                         </svg>
                         {{ schedule.time }} WIB
                     </div>
+                    <Button v-if="schedule.statusCode === 'current'" class="w-full bg-blue-600 hover:bg-blue-700">
+                        Isi Jurnal & Presensi
+                    </Button>
                     
-                    <Button :variant="schedule.isActive ? 'default' : 'outline'" class="w-full" :class="schedule.isActive ? 'bg-blue-600 hover:bg-blue-700' : ''">
-                        {{ schedule.isActive ? 'Isi Jurnal & Presensi' : 'Lihat Detail' }}
+                    <Button v-else-if="schedule.statusCode === 'past'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50">
+                        Lihat Presensi
+                    </Button>
+                    
+                    <Button v-else variant="secondary" disabled class="w-full bg-slate-100 text-slate-400">
+                        Belum Waktunya
                     </Button>
                 </CardContent>
             </Card>
         </div>
-
     </AuthenticatedLayout>
 </template>
