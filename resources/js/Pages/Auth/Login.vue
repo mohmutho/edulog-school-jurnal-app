@@ -23,10 +23,11 @@ const form = useForm({
     remember: false,
 });
 
-const submitDummy = () => {
-    // Simulasi proses klik tombol
-    console.log('Dummy Data Submitted:', form.data());
-    alert('Ini masih UI dummy! Data yang diketik: ' + form.email);
+// 2. Ubah fungsi submit menjadi aksi POST ke backend Laravel
+const submit = () => {
+    form.post('/login', {
+        onFinish: () => form.reset('password'), // Otomatis kosongkan input password jika login gagal
+    });
 };
 </script>
 
@@ -43,7 +44,7 @@ const submitDummy = () => {
             </CardHeader>
             
             <CardContent>
-                <form @submit.prevent="submitDummy" class="space-y-4">
+                <form @submit.prevent="submit" class="space-y-4">
                     <div class="space-y-2">
                         <Label for="email">Email</Label>
                         <Input 
@@ -70,7 +71,7 @@ const submitDummy = () => {
                     </div>
 
                     <Button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700">
-                        Masuk Sistem
+                        Login
                     </Button>
                 </form>
             </CardContent>
