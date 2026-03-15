@@ -7,12 +7,15 @@ import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Button } from '@/Components/ui/button';
 
-// 1. Menangkap data 'auth' dari routes/web.php
+// Menangkap data 'auth' dari routes/web.php
 const props = defineProps({
-    auth: Object
+    auth: Object,
+    jadwalHariIni: Array,
+    userName: String,
+    userJabatan: String 
 });
 
-// 2. Membuat logika sapaan dinamis berdasarkan gender dari backend
+// Membuat logika sapaan dinamis berdasarkan gender dari backend
 const greetingName = computed(() => {
     const user = props.auth.user;
     const title = user.gender === 'L' ? 'Bapak' : (user.gender === 'P' ? 'Ibu' : '');
@@ -25,7 +28,6 @@ let timeTimer = null;
 
 const updateTime = () => {
     const now = new Date();
-    // Menggunakan padStart agar format selalu 2 digit (contoh: 09:05:02)
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -35,36 +37,14 @@ const updateTime = () => {
 
 onMounted(() => {
     updateTime();
-    timeTimer = setInterval(updateTime, 1000); // Berdetak setiap 1 detik
+    timeTimer = setInterval(updateTime, 1000);
 });
 
 onBeforeUnmount(() => {
     if (timeTimer) clearInterval(timeTimer);
 });
 
-//1. Data dummy jadwal hari ini (nanti diganti dengan data dari backend)
-const todaySchedules = [
-    { 
-        id: 1, 
-        subject: 'Informatika', 
-        classroom: 'XI-7', 
-        time: '07:00 - 09:15', 
-    },
-    { 
-        id: 2, 
-        subject: 'Informatika', 
-        classroom: 'XI-8', 
-        time: '09:15 - 11:45'
-    },
-    { 
-        id: 3, 
-        subject: 'Informatika', 
-        classroom: 'XI-9', 
-        time: '12:30 - 14:45' 
-    },
-];
-
-// 2. Logika untuk menentukan status berdasarkan waktu saat ini
+// Logika untuk menentukan status berdasarkan waktu saat ini
 const getScheduleStatus = (timeString) => {
     const [start, end] = timeString.split(' - ');
     
@@ -109,19 +89,30 @@ const getScheduleStatus = (timeString) => {
         badgeLabel, 
         badgeColor, 
         actionCode,
-        // Card hanya menyala biru/highlight saat jam kelas benar-benar sedang berlangsung
         isActiveCard: currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes
     };
 };
 
-// 3. Jadwal Dinamis yang akan bereaksi setiap detik
+// Jadwal Dinamis yang akan bereaksi setiap detik
 const dynamicSchedules = computed(() => {
     const trigger = currentTime.value; 
+
+    // JARING PENGAMAN: Jika data dari Laravel belum siap atau kosong, kembalikan array kosong
+    if (!props.jadwalHariIni || !Array.isArray(props.jadwalHariIni)) {
+        return [];
+    }
     
-    return todaySchedules.map(schedule => {
-        const statusInfo = getScheduleStatus(schedule.time);
+    return props.jadwalHariIni.map(schedule => {
+        const mulai = schedule.waktuMulai || '00:00';
+        const selesai = schedule.waktuSelesai || '00:00';
+        const timeString = `${mulai} - ${selesai}`;
+        const statusInfo = getScheduleStatus(timeString);
         return {
-            ...schedule,
+            id: schedule.id,
+            subject: schedule.mataPelajaran,
+            classroom: schedule.kelas,
+            time: timeString,
+            hari: schedule.hari,
             badgeLabel: statusInfo.badgeLabel,
             badgeColor: statusInfo.badgeColor,
             actionCode: statusInfo.actionCode,
