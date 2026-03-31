@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/ui/card';
 import { Button } from '@/Components/ui/button';
@@ -14,54 +14,87 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/Components/ui/select';
+import Swal from 'sweetalert2';
 
-// Dummy Data Kelas (Nanti dari backend)
-const classInfo = {
-    subject: 'Informatika',
-    className: 'XI-8',
-    time: '09:15 - 11:45 WIB',
-    date: 'Rabu, 11 Maret 2026'
-};
-
-// Dummy Data Siswa
-const students = [
-    { id: 1, nis: '1001', name: 'Ahmad Budi Santoso', gender: 'L' },
-    { id: 2, nis: '1002', name: 'Bagus Prakoso', gender: 'L' },
-    { id: 3, nis: '1003', name: 'Dian Sastrowardoyo', gender: 'P' },
-    { id: 4, nis: '1004', name: 'Eko Patrio', gender: 'L' },
-    { id: 5, nis: '1005', name: 'Siti Aminah', gender: 'P' },
-    { id: 6, nis: '1006', name: 'Andi Prasetyo', gender: 'L' },
-    { id: 7, nis: '1007', name: 'Bunga Kusuma', gender: 'P' },
-    { id: 8, nis: '1008', name: 'Chandra Wijaya', gender: 'L' },
-    { id: 9, nis: '1009', name: 'Dewi Sartika', gender: 'P' },
-    { id: 10, nis: '1010', name: 'Ferry Gunawan', gender: 'L' }
-];
+const props = defineProps({
+    jadwal: Object,
+    siswa: Array,
+});
 
 // Opsi Presensi dengan Warna Khusus untuk UX yang maksimal
 const attendanceOptions = [
-    { code: 'H', label: 'Hadir', color: 'peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 text-green-700 bg-green-50 border-green-200' },
-    { code: 'I', label: 'Izin', color: 'peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-blue-700 bg-blue-50 border-blue-200' },
-    { code: 'S', label: 'Sakit', color: 'peer-checked:bg-yellow-500 peer-checked:text-white peer-checked:border-yellow-500 text-yellow-700 bg-yellow-50 border-yellow-200' },
-    { code: 'A', label: 'Alpha', color: 'peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 text-red-700 bg-red-50 border-red-200' },
+    { value: 'hadir', display: 'H', label: 'Hadir', color: 'peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 text-green-700 bg-green-50 border-green-200' },
+    { value: 'izin', display: 'I', label: 'Izin', color: 'peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-blue-700 bg-blue-50 border-blue-200' },
+    { value: 'sakit', display: 'S', label: 'Sakit', color: 'peer-checked:bg-yellow-500 peer-checked:text-white peer-checked:border-yellow-500 text-yellow-700 bg-yellow-50 border-yellow-200' },
+    { value: 'alpa', display: 'A', label: 'Alpha', color: 'peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 text-red-700 bg-red-50 border-red-200' },
 ];
 
-// State Form
-const form = ref({
-    kegiatan: '', // Tambahan baru untuk dropdown
-    materi: '',   // Sekarang menjadi opsional (Rincian Kegiatan)
-    catatan: '',  // Tetap ada
-    attendances: {}
+// Inisialisasi Presensi Dinamis dari Database
+// Membuat object default: { '1': 'H', '2': 'H', ... } berdasarkan ID siswa
+const initialAttendances = {};
+if (props.siswa) {
+    props.siswa.forEach(student => {
+        initialAttendances[student.id] = 'hadir'; 
+    });
+}
+
+// State Form Inertia
+const form = useForm({
+    kegiatan: '',
+    materi: '',
+    catatan: '',
+    attendances: initialAttendances // Bind langsung object yang sudah kita buat
 });
 
-// Otomatis set semua siswa menjadi 'Hadir' (H) saat halaman dimuat
-students.forEach(student => {
-    form.value.attendances[student.id] = 'H';
+// Membuat variabel classInfo secara dinamis dari database
+const classInfo = computed(() => {
+    // Format tanggal hari ini
+    const now = new Date();
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    
+    // Potong detik dari database (07:00:00 menjadi 07:00)
+    const startTime = props.jadwal?.start_time ? props.jadwal.start_time.substring(0, 5) : '';
+    const endTime = props.jadwal?.end_time ? props.jadwal.end_time.substring(0, 5) : '';
+
+    return {
+        subject: props.jadwal?.subject?.name || '-',
+        className: props.jadwal?.classroom?.name || '-',
+        date: now.toLocaleDateString('id-ID', dateOptions),
+        time: `${startTime} - ${endTime}`
+    };
 });
 
 const submitForm = () => {
-    // Simulasi submit data
-    console.log('Data yang akan dikirim ke Backend:', form.value);
-    alert('Simulasi: Jurnal & Presensi berhasil disimpan!');
+    form.post(route('journal.store', props.jadwal.id), {
+        // Ketika berhasil disimpan ke database
+        onSuccess: () => {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: 'Presensi dan Jurnal Berhasil di Simpan.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#2563eb', // Warna biru serasi dengan tombol agan
+                allowOutsideClick: false
+            }).then((result) => {
+                // Catatan: Karena di Controller kita mereturn redirect()->route('dashboard'),
+                // Inertia akan otomatis memindahkan halaman ke Dashboard di latar belakang.
+                // SweetAlert akan tetap muncul dengan cantik di atasnya!
+            });
+        },
+        // Ketika ada error validasi atau sistem
+        onError: (errors) => {
+            // Mengambil pesan error pertama dari object errors, atau pesan default
+            const errorMessage = Object.values(errors)[0] || 'Terjadi kesalahan saat menyimpan data.';
+            
+            Swal.fire({
+                title: 'Gagal Menyimpan!',
+                text: errorMessage,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#ef4444' // Warna merah
+            });
+        }
+    });
 };
 </script>
 
@@ -72,7 +105,7 @@ const submitForm = () => {
         
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <Link href="/dashboard">
+                <Link :href="route('dashboard')">
                     <Button variant="outline" size="icon" class="rounded-full">
                         <ChevronLeft class="h-5 w-5" />
                     </Button>
@@ -97,7 +130,7 @@ const submitForm = () => {
                         <div class="flex items-center justify-between">
                             <div>
                                 <CardTitle>Presensi Siswa</CardTitle>
-                                <CardDescription>Total: {{ students.length }} Siswa</CardDescription>
+                                <CardDescription>Total: {{ siswa?.length || 0 }} Siswa</CardDescription>
                             </div>
                             <div class="flex space-x-2 text-xs font-medium text-slate-500">
                                 <span>H: Hadir</span>
@@ -109,25 +142,29 @@ const submitForm = () => {
                     </CardHeader>
                     
                     <CardContent class="space-y-3 max-h-140 overflow-y-auto pr-4">
-                        <div v-for="(student, index) in students" :key="student.id" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3">
+                        <div v-for="(student, index) in siswa" :key="student.id" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 hover:bg-slate-50 transition-colors gap-3">
                             
                             <div class="flex items-center space-x-3">
                                 <div class="w-8 text-center text-sm font-semibold text-slate-400">{{ index + 1 }}</div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">{{ student.name }}</p>
-                                    <p class="text-xs text-slate-500">NIS: {{ student.nis }} • {{ student.gender }}</p>
+                                    <p class="text-xs text-slate-500">NIS: {{ student.nis }} • {{ student.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
                                 </div>
                             </div>
 
                             <div class="flex space-x-2 ml-11 sm:ml-0">
-                                <label v-for="opt in attendanceOptions" :key="opt.code" class="cursor-pointer">
-                                    <input type="radio" :name="'attendance_' + student.id" :value="opt.code" v-model="form.attendances[student.id]" class="peer sr-only">
+                                <label v-for="opt in attendanceOptions" :key="opt.value" class="cursor-pointer">
+                                    <input type="radio" :name="'attendance_' + student.id" :value="opt.value" v-model="form.attendances[student.id]" class="peer sr-only">
                                     <div :class="['w-9 h-9 flex items-center justify-center rounded-md text-sm font-bold border transition-all duration-200', opt.color]">
-                                        {{ opt.code }}
+                                        {{ opt.display }}
                                     </div>
                                 </label>
                             </div>
 
+                        </div>
+                        
+                        <div v-if="siswa.length === 0" class="text-center py-8 text-slate-500">
+                            Belum ada siswa terdaftar di kelas ini.
                         </div>
                     </CardContent>
                 </Card>
@@ -153,6 +190,7 @@ const submitForm = () => {
                                         <SelectItem value="Praktikum">Praktikum</SelectItem>
                                         <SelectItem value="Berdiskusi">Berdiskusi</SelectItem>
                                         <SelectItem value="Ulangan Harian">Ulangan Harian</SelectItem>
+                                        <SelectItem value="Pembelajaran Mandiri">Pembelajaran Mandiri</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -182,7 +220,7 @@ const submitForm = () => {
 
         </div>
 
-        <div class="mt-8 flex lg:justify-end">
+        <div class="mt-8 flex lg:justify-end mb-10">
             <Button @click="submitForm" class="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 h-auto text-base font-semibold shadow-lg shadow-blue-500/30">
                 <Save class="w-5 h-5 mr-2" />
                 Simpan Jurnal & Presensi

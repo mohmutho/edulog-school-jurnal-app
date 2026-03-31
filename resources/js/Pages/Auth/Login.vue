@@ -71,7 +71,9 @@ const submit = () => {
                     </div>
 
                     <Button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700">
-                        Login
+                        <Link>
+                            Login
+                        </Link>
                     </Button>
                 </form>
             </CardContent>
