@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Journal extends Model
 {
-    //
+    protected $guarded = ['id'];
+
+    
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

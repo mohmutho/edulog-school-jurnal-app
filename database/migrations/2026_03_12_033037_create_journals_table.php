@@ -18,7 +18,8 @@ return new class extends Migration
             
             // Data Pelaksanaan Jurnal
             $table->date('date'); // Tanggal aktual kelas berjalan
-            $table->text('material_covered'); // Rincian materi yang diajarkan
+            $table->text('activity_type'); // Jenis kegiatan yang dilakukan
+            $table->text('description')->nullable(); // Rincian materi yang diajarkan
             $table->text('notes')->nullable(); // Catatan khusus (Opsional)
             
             // Flag keamanan untuk fitur Bulk Action Admin (Classmeeting/Libur)
