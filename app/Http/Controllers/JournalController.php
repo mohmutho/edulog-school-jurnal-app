@@ -120,4 +120,82 @@ class JournalController extends Controller
             'presensi' => $journal->attendances
         ]);
     }
+
+    public function edit(Journal $journal)
+    {
+        // 1. Load relasi jadwal untuk pengecekan keamanan
+        $journal->load(['schedule.subject', 'schedule.classroom']);
+        
+        // 2. Keamanan: Pastikan jurnal ini milik guru yang sedang login
+        if ($journal->schedule->user_id !== Auth::id()) {
+            abort(403, 'Akses Ditolak: Anda tidak memiliki akses untuk mengedit jurnal ini.');
+        }
+
+        // 3. LOGIKA GEMBOK MINGGUAN: Pastikan jurnal berada di minggu yang sedang berjalan
+        $awalMinggu = now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $akhirMinggu = now()->endOfWeek(Carbon::SUNDAY)->toDateString();
+
+        if ($journal->date < $awalMinggu || $journal->date > $akhirMinggu) {
+            return redirect()->route('journal.show', $journal->schedule_id)
+                ->with('error', 'Masa edit untuk jurnal ini sudah ditutup karena telah berganti minggu.');
+        }
+
+        // 4. Load data presensi dan urutkan nama siswa sesuai abjad
+        $journal->load(['attendances.student' => function ($query) {
+            $query->orderBy('name', 'asc');
+        }]);
+
+        // 5. Lempar data ke halaman Edit.vue
+        return Inertia::render('Journal/Edit', [
+            'jadwal' => $journal->schedule,
+            'jurnal' => $journal,
+            'presensi' => $journal->attendances
+        ]);
+    }
+
+    public function update(Request $request, Journal $journal)
+    {
+        // 1. Validasi Keamanan Lapis Dua (Mencegah bypass via API/Postman)
+        $journal->load('schedule');
+        if ($journal->schedule->user_id !== Auth::id()) {
+            abort(403, 'Akses Ditolak.');
+        }
+
+        $awalMinggu = now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        if ($journal->date < $awalMinggu) {
+            abort(403, 'Jurnal ini sudah terkunci secara permanen.');
+        }
+
+        // 2. Validasi Input dari Form
+        $validated = $request->validate([
+            'activity_type' => 'required|string|max:255',
+            'description'   => 'nullable|string',
+            'notes'         => 'nullable|string',
+            'attendances'   => 'required|array',
+            'attendances.*' => 'required|in:hadir,izin,sakit,alpa',
+        ]);
+
+        // 3. Proses Update dengan Database Transaction
+        DB::transaction(function () use ($validated, $journal) {
+            // Update Jurnal & BUKA GEMBOK (is_locked menjadi false)
+            // Karena data ini sekarang adalah hasil koreksi valid dari guru, bukan lagi auto-fill
+            $journal->update([
+                'activity_type' => $validated['activity_type'],
+                'description'   => $validated['description'],
+                'notes'         => $validated['notes'],
+                'is_locked'     => false, 
+            ]);
+
+            // Update status presensi siswa
+            foreach ($validated['attendances'] as $studentId => $status) {
+                Attendance::where('journal_id', $journal->id)
+                    ->where('student_id', $studentId)
+                    ->update(['status' => $status]);
+            }
+        });
+
+        // 4. Kembalikan ke halaman Lihat Presensi
+        return redirect()->route('journal.show', $journal->schedule_id)
+            ->with('success', 'Jurnal dan Presensi berhasil diperbarui!');
+    }
 }

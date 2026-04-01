@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" class="relative h-8 w-8 rounded-full ml-2">
+                            <Button variant="ghost" class="relative h-8 w-8 rounded-full ml-2 cursor-pointer">
                                 <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
                                     {{ user.name.charAt(0) }}
                                 </div>

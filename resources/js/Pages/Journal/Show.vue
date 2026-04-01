@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/Components/ui/card';
 import { Button } from '@/Components/ui/button';
-import { ChevronLeft, CheckCircle2 } from 'lucide-vue-next';
+import { ChevronLeft, CheckCircle2, Pencil } from 'lucide-vue-next';
 
 const props = defineProps({
     jadwal: Object,
@@ -28,6 +28,29 @@ const classInfo = computed(() => {
     };
 });
 
+// Logika Gembok Mingguan di sisi UI
+const canEdit = computed(() => {
+    const today = new Date();
+    // JS getDay(): 0 = Minggu, 1 = Senin. Kita cari selisih ke hari Senin.
+    const day = today.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day; 
+    
+    // Set awal minggu (Senin 00:00:00)
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() + diffToMonday);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    // Set akhir minggu (Minggu 23:59:59)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const journalDate = new Date(props.jurnal.date);
+    
+    // Tombol hanya muncul jika tanggal jurnal berada di dalam minggu ini
+    return journalDate >= startOfWeek && journalDate <= endOfWeek;
+});
+
 // Fungsi untuk mewarnai Badge Absensi sesuai status di database
 const getStatusBadge = (status) => {
     switch(status) {
@@ -43,6 +66,7 @@ const getStatusBadge = (status) => {
 const capitalize = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
 };
+
 </script>
 
 <template>
@@ -52,13 +76,19 @@ const capitalize = (str) => {
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <Link href="/dashboard">
-                    <Button variant="outline" size="icon" class="rounded-full">
+                    <Button variant="outline" size="icon" class="rounded-full cursor-pointer">
                         <ChevronLeft class="h-5 w-5" />
                     </Button>
                 </Link>
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Detail Jurnal Kelas</h1>
+                        <Link v-if="canEdit" :href="route('journal.edit', jurnal.id)">
+                            <Button variant="outline" size="sm" class="flex items-center gap-2 border-orange-200 text-orange-600 hover:bg-orange-50 cursor-pointer">
+                                <Pencil class="w-4 h-4" />
+                                Edit Jurnal
+                            </Button>
+                        </Link>
                         <CheckCircle2 class="w-5 h-5 text-teal-500" />
                     </div>
                     <p class="text-sm text-slate-500">{{ classInfo.subject }} • Kelas {{ classInfo.className }}</p>
@@ -105,8 +135,15 @@ const capitalize = (str) => {
             <div class="lg:col-span-5 space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Jurnal Mengajar</CardTitle>
-                        <CardDescription>Laporan kegiatan yang telah diisi.</CardDescription>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <CardTitle>Jurnal Mengajar</CardTitle>
+                                <CardDescription>Laporan kegiatan yang telah diisi.</CardDescription>
+                            </div>
+                            <span v-if="jurnal.is_locked" class="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-teal-700 bg-teal-100 rounded-full">
+                                Auto-Fill Sistem
+                            </span>
+                        </div>
                     </CardHeader>
                     <CardContent class="space-y-6">
                         
