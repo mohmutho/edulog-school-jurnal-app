@@ -34,4 +34,12 @@ Route::get('/jurnal/{schedule}/show', [JournalController::class, 'show'])
     ->middleware(['auth', 'verified'])
     ->name('journal.show');
 
+Route::get('/jurnal/{journal}/edit', [JournalController::class, 'edit'])
+    ->middleware(['auth', 'verified'])
+    ->name('journal.edit');
+
+Route::put('/jurnal/{journal}', [JournalController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('journal.update');
+
 require __DIR__.'/auth.php';

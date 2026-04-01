@@ -34,6 +34,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'), // Password default: password
             'role' => 'guru',
             'gender' => 'L',
+            'email_verified_at' => now(),
         ]);
         $guru2 = User::create([
             'name' => 'Nur Sholihin',
@@ -41,6 +42,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'), // Password default: password
             'role' => 'guru',
             'gender' => 'L',
+            'email_verified_at' => now(),
         ]);
         $guru3 = User::create([
             'name' => 'Siti Rumiyati',
@@ -48,6 +50,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'), // Password default: password
             'role' => 'guru',
             'gender' => 'P',
+            'email_verified_at' => now(),
         ]);
 
         // 3. MASTER DATA: Kelas

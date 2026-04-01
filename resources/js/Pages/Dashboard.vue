@@ -182,13 +182,13 @@ const dynamicSchedules = computed(() => {
                         {{ schedule.hari }}, {{ schedule.time }} WIB
                     </div>
                     
-                    <Button v-if="schedule.actionCode === 'fill'" as-child class="w-full bg-blue-600 hover:bg-blue-700">
+                    <Button v-if="schedule.actionCode === 'fill'" as-child class="w-full bg-blue-600 hover:bg-blue-700 cursor-pointer">
                         <Link :href="route('journal.create', schedule.id)">
                             Isi Jurnal & Presensi
                         </Link>
                     </Button>
                     
-                    <Button v-else-if="schedule.actionCode === 'view'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50">
+                    <Button v-else-if="schedule.actionCode === 'view'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50 cursor-pointer">
                         <Link :href="route('journal.show', schedule.id)">
                             Lihat Presensi
                         </Link>

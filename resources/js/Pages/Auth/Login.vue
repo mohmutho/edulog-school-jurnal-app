@@ -55,6 +55,9 @@ const submit = () => {
                             required 
                             autofocus 
                         />
+                        <p v-if="form.errors.email" class="text-xs font-medium text-red-500 mt-1">
+                            {{ form.errors.email }}
+                        </p>
                     </div>
                     
                     <div class="space-y-2">
@@ -68,12 +71,17 @@ const submit = () => {
                             v-model="form.password" 
                             required 
                         />
+                        <p v-if="form.errors.password" class="text-xs font-medium text-red-500 mt-1">
+                            {{ form.errors.password }}
+                        </p>
                     </div>
 
-                    <Button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700">
-                        <Link>
-                            Login
-                        </Link>
+                    <Button 
+                        type="submit" 
+                        class="w-full mt-6 bg-blue-600 hover:bg-blue-700 cursor-pointer disabled:cursor-not-allowed"
+                        :disabled="form.processing"
+                    >
+                        {{ form.processing ? 'Sedang Masuk...' : 'Login' }}
                     </Button>
                 </form>
             </CardContent>

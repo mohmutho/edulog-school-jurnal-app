@@ -221,9 +221,11 @@ const submitForm = () => {
         </div>
 
         <div class="mt-8 flex lg:justify-end mb-10">
-            <Button @click="submitForm" class="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 h-auto text-base font-semibold shadow-lg shadow-blue-500/30">
+            <Button @click="submitForm" 
+                class="w-full lg:w-auto bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 h-auto text-base font-semibold shadow-lg shadow-blue-500/30 cursor-pointer disabled:cursor-not-allowed transition-all gap-2"
+                :disabled="form.processing">
                 <Save class="w-5 h-5 mr-2" />
-                Simpan Jurnal & Presensi
+                {{ form.processing ? 'Menyimpan Data...' : 'Simpan Jurnal & Presensi' }}
             </Button>
         </div>
 
