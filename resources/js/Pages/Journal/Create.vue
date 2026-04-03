@@ -64,6 +64,10 @@ const classInfo = computed(() => {
     };
 });
 
+const goBack = () => {
+    window.history.back();
+};
+
 const submitForm = () => {
     form.post(route('journal.store', props.jadwal.id), {
         // Ketika berhasil disimpan ke database
@@ -105,11 +109,9 @@ const submitForm = () => {
         
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <Link :href="route('dashboard')">
-                    <Button variant="outline" size="icon" class="rounded-full">
-                        <ChevronLeft class="h-5 w-5" />
-                    </Button>
-                </Link>
+                <Button @click="goBack" type="button" variant="outline" size="icon" class="rounded-full hover:bg-slate-100">
+                    <ChevronLeft class="h-5 w-5" />
+                </Button>
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Isi Jurnal & Presensi</h1>
                     <p class="text-sm text-slate-500">{{ classInfo.subject }} • Kelas {{ classInfo.className }}</p>

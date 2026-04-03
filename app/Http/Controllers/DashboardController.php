@@ -5,26 +5,21 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Schedule;
-use App\Models\Journal;
-use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index()
     {
         $userId = Auth::id();
-        $now = now();
-        $currentDayOfWeek = $now->dayOfWeekIso; 
-        $isPast1800 = $now->format('H:i') >= '18:00';
-
+        $now = Carbon::now();
+        
         $awalMinggu = $now->copy()->startOfWeek(Carbon::MONDAY);
         $akhirMinggu = $now->copy()->endOfWeek(Carbon::SUNDAY);
 
-        // 1. Ubah withExists menjadi with('journals') untuk mengambil datanya
-        $schedules = Schedule::with(['classroom.students', 'subject', 'journals' => function ($query) use ($awalMinggu, $akhirMinggu) {
+        // 1. Ambil jadwal beserta jurnalnya (hanya di rentang minggu ini)
+        $schedules = Schedule::with(['classroom', 'subject', 'journals' => function ($query) use ($awalMinggu, $akhirMinggu) {
                 $query->whereBetween('date', [$awalMinggu->toDateString(), $akhirMinggu->toDateString()]);
             }])
             ->where('user_id', $userId)
@@ -32,64 +27,12 @@ class DashboardController extends Controller
             ->orderBy('start_time')
             ->get();
 
-        // 2. SISTEM AUTO-FILL & PENGECEKAN STATUS
-        foreach ($schedules as $schedule) {
-            $shouldBeAutoFilled = false;
-            $scheduleDate = $awalMinggu->copy()->addDays($schedule->day_of_week - 1);
-
-            // Cek apakah jurnal sudah ada (Manual atau Auto)
-            $existingJournal = $schedule->journals->first();
-            $schedule->is_journal_filled = $existingJournal !== null;
-            // Jika ada jurnalnya, cek apakah dia terkunci (Auto-fill)
-            $schedule->is_auto_filled = $existingJournal ? $existingJournal->is_locked : false;
-
-            if (!$schedule->is_journal_filled) {
-                if ($schedule->day_of_week < $currentDayOfWeek) {
-                    $shouldBeAutoFilled = true; 
-                } elseif ($schedule->day_of_week == $currentDayOfWeek && $isPast1800) {
-                    $shouldBeAutoFilled = true; 
-                }
-            }
-
-            if ($shouldBeAutoFilled) {
-                DB::transaction(function () use ($schedule, $scheduleDate) {
-                    $journal = Journal::create([
-                        'schedule_id'   => $schedule->id,
-                        'date'          => $scheduleDate->toDateString(),
-                        'activity_type' => 'Pembelajaran Mandiri', 
-                        'description'   => null,
-                        'notes'         => null,
-                        'is_locked'     => true, // Kunci sebagai penanda Auto-Fill
-                    ]);
-
-                    $students = $schedule->classroom->students;
-                    $attendances = [];
-                    foreach ($students as $student) {
-                        $attendances[] = [
-                            'journal_id' => $journal->id,
-                            'student_id' => $student->id,
-                            'status'     => 'hadir',
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ];
-                    }
-                    if (!empty($attendances)) {
-                        Attendance::insert($attendances);
-                    }
-                });
-                
-                // Update status di memory agar dikenali Vue
-                $schedule->is_journal_filled = true; 
-                $schedule->is_auto_filled = true; 
-            }
-        }
-
         $hariMap = [
             1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu',
             4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', 7 => 'Minggu'
         ];
 
-        // 3. Mapping data untuk Vue (Tambahkan operan is_auto_filled)
+        // 2. Mapping data mentah untuk dikonsumsi Vue
         $formattedSchedules = $schedules->map(function ($schedule) use ($hariMap) {
             return [
                 'id' => $schedule->id,
@@ -99,15 +42,15 @@ class DashboardController extends Controller
                 'waktuSelesai' => Carbon::parse($schedule->end_time)->format('H:i'),
                 'hari' => $hariMap[$schedule->day_of_week],
                 'hari_angka' => $schedule->day_of_week,
-                'is_journal_filled' => $schedule->is_journal_filled,
-                'is_auto_filled' => $schedule->is_auto_filled, // --- OPERAN BARU ---
+                'is_journal_filled' => $schedule->journals->isNotEmpty(),
+                // is_auto_filled kita hapus karena sudah tidak ada logika auto-fill di sini
             ];
         });
 
         return Inertia::render('Dashboard', [
             'jadwalMingguan' => $formattedSchedules, 
             'userName' => Auth::user()->name,
-            'userJabatan' => 'Guru Mata Pelajaran', 
+            'userJabatan' => 'Guru Informatika', // Disesuaikan dengan role Anda
         ]);
     }
 }

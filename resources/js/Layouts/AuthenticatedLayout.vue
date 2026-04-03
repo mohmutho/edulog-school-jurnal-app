@@ -28,11 +28,32 @@ const page = usePage();
 const user = computed(() => page.props.auth?.user || { name: 'Guest', role: 'Guest' });
 
 // Menu navigasi disiapkan dalam array agar mudah dilooping
+// Menu navigasi disiapkan dalam array agar mudah dilooping
 const navigation = [
-    { name: 'Dashboard', href: '#', icon: LayoutDashboard, current: true },
-    { name: 'Jadwal Mengajar', href: '#', icon: CalendarDays, current: false },
-    { name: 'Jurnal & Presensi', href: '#', icon: BookOpenCheck, current: false },
-    { name: 'Data Siswa', href: '#', icon: Users, current: false },
+    { 
+        name: 'Dashboard', 
+        href: route('dashboard'), 
+        icon: LayoutDashboard, 
+        current: route().current('dashboard') 
+    },
+    { 
+        name: 'Jadwal Mengajar', 
+        href: '#', // Biarkan '#' untuk fitur yang belum dibuat
+        icon: CalendarDays, 
+        current: false 
+    },
+    { 
+        name: 'Jurnal & Presensi', 
+        href: route('journal.index'), // Arahkan ke route index jurnal
+        icon: BookOpenCheck, 
+        current: route().current('journal.index') || route().current('journal.show') || route().current('journal.edit')
+    },
+    { 
+        name: 'Data Siswa', 
+        href: '#', 
+        icon: Users, 
+        current: false 
+    },
 ];
 
 // LOGIKA HARI & TANGGAL SAJA

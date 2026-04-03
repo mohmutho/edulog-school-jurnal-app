@@ -62,6 +62,10 @@ const getStatusBadge = (status) => {
     }
 };
 
+const goBack = () => {
+    window.history.back();
+};
+
 // Fungsi mengubah tulisan ke huruf kapital depan (hadir -> Hadir)
 const capitalize = (str) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -75,11 +79,9 @@ const capitalize = (str) => {
     <AuthenticatedLayout>
         <div class="mb-6 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <Link href="/dashboard">
-                    <Button variant="outline" size="icon" class="rounded-full cursor-pointer">
-                        <ChevronLeft class="h-5 w-5" />
-                    </Button>
-                </Link>
+                <Button @click="goBack" type="button" variant="outline" size="icon" class="rounded-full hover:bg-slate-100">
+                    <ChevronLeft class="h-5 w-5" />
+                </Button>
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Detail Jurnal Kelas</h1>

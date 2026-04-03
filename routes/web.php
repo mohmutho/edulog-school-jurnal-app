@@ -42,4 +42,8 @@ Route::put('/jurnal/{journal}', [JournalController::class, 'update'])
     ->middleware(['auth', 'verified'])
     ->name('journal.update');
 
+Route::get('/jurnal', [JournalController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('journal.index');
+
 require __DIR__.'/auth.php';

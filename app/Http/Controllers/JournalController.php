@@ -14,6 +14,36 @@ use Carbon\Carbon;
 
 class JournalController extends Controller
 {
+    public function index(Request $request)
+    {
+        // 1. Ambil parameter filter dari URL (jika ada)
+        $filterMonth = $request->input('month');
+
+        // 2. Query dasar: Ambil Jurnal beserta relasi Jadwal, Mata Pelajaran, dan Kelas
+        $query = Journal::with(['schedule.subject', 'schedule.classroom'])
+            // Filter Keamanan: Hanya jurnal dari jadwal milik guru yang login
+            ->whereHas('schedule', function ($q) {
+                $q->where('user_id', Auth::id());
+            });
+
+        // 3. Terapkan Filter Bulan (jika user memilih bulan di Vue nanti)
+        if ($filterMonth) {
+            $query->whereMonth('date', $filterMonth)
+                  ->whereYear('date', now()->year); // Asumsi tahun ini
+        }
+
+        // 4. Eksekusi Query dengan Pagination (10 data per halaman) dan urutkan dari terbaru
+        $journals = $query->orderBy('date', 'desc')->paginate(10);
+
+        // 5. Lempar data ke Vue
+        return Inertia::render('Journal/Index', [
+            'journals' => $journals,
+            'filters'  => [
+                'month' => $filterMonth,
+            ]
+        ]);
+    }
+
     public function create(Schedule $schedule)
     {
         // 1. Pastikan jadwal yang diminta milik guru yang sedang login
@@ -28,8 +58,6 @@ class JournalController extends Controller
             ->where('status', 'aktif')
             ->orderBy('name', 'asc')
             ->get();
-        
-        // return $students; // Debug: Pastikan data siswa muncul di log
 
         return Inertia::render('Journal/Create', [
             'jadwal' => $schedule,
