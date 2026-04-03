@@ -49,6 +49,10 @@ const submitForm = () => {
     form.put(route('journal.update', props.jurnal.id));
 };
 
+const goBack = () => {
+    window.history.back();
+};
+
 // Logika UI untuk mewarnai baris siswa sesuai status
 const getRowClass = (status) => {
     switch (status) {
@@ -68,11 +72,9 @@ const getRowClass = (status) => {
         
         <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center space-x-4">
-                <Link :href="route('journal.show', jadwal.id)">
-                    <Button variant="outline" size="icon" class="rounded-full">
-                        <ChevronLeft class="h-5 w-5" />
-                    </Button>
-                </Link>
+                <Button @click="goBack" type="button" variant="outline" size="icon" class="rounded-full hover:bg-slate-100">
+                    <ChevronLeft class="h-5 w-5" />
+                </Button>
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Edit Jurnal Kelas</h1>
                     <p class="text-sm text-slate-500">{{ classInfo.subject }} • Kelas {{ classInfo.className }}</p>

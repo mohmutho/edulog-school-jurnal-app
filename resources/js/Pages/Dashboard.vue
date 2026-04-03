@@ -13,7 +13,7 @@ const props = defineProps({
 });
 
 const greetingName = computed(() => {
-    const user = props.auth.user;
+    const user = props.auth?.user || { name: props.userName, gender: 'L' };
     const title = user.gender === 'L' ? 'Bapak' : (user.gender === 'P' ? 'Ibu' : '');
     return `${title} ${user.name}`.trim();
 });
@@ -26,7 +26,6 @@ const updateTime = () => {
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    
     currentTime.value = `${hours}:${minutes}:${seconds}`;
 };
 
@@ -39,7 +38,8 @@ onBeforeUnmount(() => {
     if (timeTimer) clearInterval(timeTimer);
 });
 
-const getScheduleStatus = (timeString, isFilled, isAutoFilled, scheduleDay) => {
+// CORE LOGIC: State Machine Jadwal
+const getScheduleStatus = (timeString, isFilled, scheduleDay) => {
     const [start, end] = timeString.split(' - ');
     const now = new Date();
     
@@ -55,57 +55,55 @@ const getScheduleStatus = (timeString, isFilled, isAutoFilled, scheduleDay) => {
 
     let badgeLabel = '';
     let badgeColor = '';
-    let actionCode = '';
+    let actionCode = ''; 
     let isActiveCard = false;
 
-    // A. JIKA JADWAL DI HARI MENDATANG
+    // JIKA JADWAL SUDAH DIISI
+    if (isFilled) {
+        badgeLabel = 'Selesai';
+        badgeColor = 'bg-green-100 text-green-700';
+        actionCode = 'view';
+        return { badgeLabel, badgeColor, actionCode, isActiveCard };
+    }
+
+    // JIKA BELUM DIISI, CEK BERDASARKAN HARI:
+    
+    // A. JADWAL DI HARI MENDATANG
     if (scheduleDay > currentDay) {
-        badgeLabel = 'Akan Datang';
+        badgeLabel = 'Belum Mulai';
         badgeColor = 'bg-slate-100 text-slate-500';
         actionCode = 'waiting'; 
     } 
-    // B. JIKA JADWAL DI HARI LALU
+    // B. JADWAL DI HARI LALU (Hutang Presensi)
     else if (scheduleDay < currentDay) {
-        if (isFilled && isAutoFilled) {
-            badgeLabel = 'Selesai (Auto-Fill)';
-            badgeColor = 'bg-teal-100 text-teal-700';
-        } else {
-            badgeLabel = 'Selesai';
-            badgeColor = 'bg-green-100 text-green-700';
-        }
-        actionCode = 'view';
+        badgeLabel = 'Selesai (Belum Presensi)';
+        badgeColor = 'bg-red-100 text-red-700';
+        actionCode = 'susulan';
     } 
-    // C. JIKA JADWAL ADALAH HARI INI
+    // C. JADWAL HARI INI
     else {
         isActiveCard = currentTotalMinutes >= startTotalMinutes && currentTotalMinutes <= endTotalMinutes;
 
-        // Label Warna Card Hari Ini
         if (currentTotalMinutes < startTotalMinutes) {
-            badgeLabel = 'Belum Dimulai';
-            badgeColor = 'bg-orange-100 text-orange-700';
-        } else if (isActiveCard) {
+            badgeLabel = 'Belum Mulai';
+            badgeColor = 'bg-slate-100 text-slate-500';
+            actionCode = 'waiting';
+        } 
+        else if (isActiveCard) {
             badgeLabel = 'Sedang Berjalan';
             badgeColor = 'bg-blue-100 text-blue-700';
-        } else {
-            if (isFilled && isAutoFilled) {
-                badgeLabel = 'Selesai (Auto-Fill)';
-                badgeColor = 'bg-teal-100 text-teal-700';
+            actionCode = 'fill';
+        } 
+        else {
+            // Waktu pelajaran sudah habis
+            badgeLabel = 'Selesai (Belum Presensi)';
+            badgeColor = 'bg-red-100 text-red-700';
+            
+            if (currentTotalMinutes < batasAkhirMinutes) {
+                actionCode = 'fill';
             } else {
-                badgeLabel = 'Selesai';
-                badgeColor = 'bg-green-100 text-green-700';
+                actionCode = 'susulan';
             }
-        }
-
-        // Logika Tombol Aksi Hari Ini
-        if (isFilled) {
-            actionCode = 'view'; // Berubah jadi Lihat Presensi
-        } else if (currentTotalMinutes < startTotalMinutes) {
-            actionCode = 'waiting'; // Belum Waktunya
-        } else if (currentTotalMinutes < batasAkhirMinutes) {
-            actionCode = 'fill'; // Bisa diisi (Isi Jurnal & Presensi)
-        } else {
-            // Jika lewat jam 18:00 dan backend kebetulan telat merespons
-            actionCode = 'view'; 
         }
     }
 
@@ -113,26 +111,20 @@ const getScheduleStatus = (timeString, isFilled, isAutoFilled, scheduleDay) => {
 };
 
 const dynamicSchedules = computed(() => {
-    // Memancing re-render tiap detik saat currentTime berubah
     const trigger = currentTime.value; 
     
     if (!props.jadwalMingguan || !Array.isArray(props.jadwalMingguan)) return [];
     
     return props.jadwalMingguan.map(schedule => {
         const timeString = `${schedule.waktuMulai || '00:00'} - ${schedule.waktuSelesai || '00:00'}`;
-        // PENTING: Sisipkan schedule.is_auto_filled ke dalam fungsi
         const statusInfo = getScheduleStatus(
             timeString, 
             schedule.is_journal_filled, 
-            schedule.is_auto_filled, 
             schedule.hari_angka
         );
         return {
-            id: schedule.id,
-            subject: schedule.mataPelajaran, 
-            classroom: schedule.kelas,       
+            ...schedule,
             time: timeString,
-            hari: schedule.hari,
             badgeLabel: statusInfo.badgeLabel,
             badgeColor: statusInfo.badgeColor,
             actionCode: statusInfo.actionCode,
@@ -163,32 +155,38 @@ const dynamicSchedules = computed(() => {
             <Card v-for="schedule in dynamicSchedules" :key="schedule.id" :class="[schedule.isActiveCard ? 'border-blue-500 shadow-md ring-1 ring-blue-500' : 'border-slate-200']">
                 <CardHeader class="pb-3">
                     <div class="flex justify-between items-start">
-                        <CardTitle class="text-xl">{{ schedule.subject }}</CardTitle>
+                        <CardTitle class="text-xl">{{ schedule.mataPelajaran }}</CardTitle>
                         
-                        <span :class="schedule.badgeColor" class="px-2.5 py-0.5 rounded-full text-xs font-semibold">
+                        <span :class="schedule.badgeColor" class="px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-bold text-center">
                             {{ schedule.badgeLabel }}
                         </span>
                     </div>
                     <CardDescription class="text-lg font-medium text-slate-700 mt-1">
-                        Kelas: {{ schedule.classroom }}
+                        Kelas: {{ schedule.kelas }}
                     </CardDescription>
                 </CardHeader>
         
                 <CardContent>
                     <div class="flex items-center text-sm text-slate-500 mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {{ schedule.hari }}, {{ schedule.time }} WIB
                     </div>
                     
                     <Button v-if="schedule.actionCode === 'fill'" as-child class="w-full bg-blue-600 hover:bg-blue-700 cursor-pointer">
-                        <Link :href="route('journal.create', schedule.id)">
-                            Isi Jurnal & Presensi
+                        <Link :href="route('jurnal.create', schedule.id)">
+                            Isi Presensi
                         </Link>
                     </Button>
                     
-                    <Button v-else-if="schedule.actionCode === 'view'" variant="outline" class="w-full text-green-700 border-green-200 hover:bg-green-50 cursor-pointer">
+                    <Button v-else-if="schedule.actionCode === 'susulan'" as-child class="w-full bg-orange-600 hover:bg-orange-700 cursor-pointer shadow-sm">
+                        <Link :href="route('jurnal.create', schedule.id)">
+                            Isi Susulan
+                        </Link>
+                    </Button>
+                    
+                    <Button v-else-if="schedule.actionCode === 'view'" variant="outline" as-child class="w-full text-green-700 border-green-200 hover:bg-green-50 cursor-pointer">
                         <Link :href="route('journal.show', schedule.id)">
                             Lihat Presensi
                         </Link>
