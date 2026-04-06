@@ -50,9 +50,15 @@ const navigation = [
     },
     { 
         name: 'Data Siswa', 
-        href: '#', 
+        href: route('student.index'), 
         icon: Users, 
-        current: false 
+        current: route().current('student.index') 
+    },
+    { 
+        name: 'Kalender Akademik', 
+        href: route('calendar.index'), 
+        icon: CalendarDays, 
+        current: route().current('calendar.index') 
     },
 ];
 

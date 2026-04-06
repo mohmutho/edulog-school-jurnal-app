@@ -421,7 +421,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 8. DATA DUMMY JURNAL UNTUK TESTING "LIHAT PRESENSI"
-        // Ambil hari ini secara dinamis (1 = Senin, 7 = Minggu)
         $hariIni = now()->dayOfWeekIso; 
         
         // Cari 1 jadwal milik Guru Mutho pada hari ini

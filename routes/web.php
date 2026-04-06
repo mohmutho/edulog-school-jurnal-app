@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JournalController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\CalendarController;
 
 
 Route::get('/', function () {
@@ -45,5 +47,13 @@ Route::put('/jurnal/{journal}', [JournalController::class, 'update'])
 Route::get('/jurnal', [JournalController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('journal.index');
+
+Route::get('/data-siswa', [StudentController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('student.index');
+
+Route::get('/kalender-pendidikan', [CalendarController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('calendar.index');
 
 require __DIR__.'/auth.php';

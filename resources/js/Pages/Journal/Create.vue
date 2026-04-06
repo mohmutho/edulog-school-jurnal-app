@@ -150,7 +150,7 @@ const submitForm = () => {
                                 <div class="w-8 text-center text-sm font-semibold text-slate-400">{{ index + 1 }}</div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">{{ student.name }}</p>
-                                    <p class="text-xs text-slate-500">NIS: {{ student.nis }} • {{ student.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
+                                    <p class="text-xs text-slate-500">NISN: {{ student.nisn }} • {{ student.gender === 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
                                 </div>
                             </div>
 
