@@ -119,7 +119,7 @@ const capitalize = (str) => {
                                 <div class="w-8 text-center text-sm font-semibold text-slate-400">{{ index + 1 }}</div>
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">{{ item.student?.name }}</p>
-                                    <p class="text-xs text-slate-500">NIS: {{ item.student?.nis }}</p>
+                                    <p class="text-xs text-slate-500">NISN: {{ item.student?.nisn }}</p>
                                 </div>
                             </div>
 
