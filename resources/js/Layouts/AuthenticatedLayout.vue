@@ -38,9 +38,9 @@ const navigation = [
     },
     { 
         name: 'Jadwal Mengajar', 
-        href: '#', // Biarkan '#' untuk fitur yang belum dibuat
+        href: route('schedule.index'), 
         icon: CalendarDays, 
-        current: false 
+        current: route().current('schedule.index') 
     },
     { 
         name: 'Jurnal & Presensi', 
@@ -166,13 +166,16 @@ onBeforeUnmount(() => {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem class="cursor-pointer">Profil Saya</DropdownMenuItem>
-                            <DropdownMenuItem class="cursor-pointer">Pengaturan</DropdownMenuItem>
+                            <Link :href="route('profile.edit')">
+                                <DropdownMenuItem class="cursor-pointer">Pengaturan Akun</DropdownMenuItem>
+                            </Link>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem class="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
-                                <LogOut class="mr-2 h-4 w-4" />
-                                <span>Logout</span>
-                            </DropdownMenuItem>
+                            <Link :href="route('logout')" method="post" as="button" class="w-full text-left">
+                                <DropdownMenuItem class="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
+                                    <LogOut class="mr-2 h-4 w-4" />
+                                    <span>Logout</span>
+                                </DropdownMenuItem>
+                            </Link>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

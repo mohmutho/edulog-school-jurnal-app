@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\TeachingScheduleController;
 
 
 Route::get('/', function () {
@@ -48,6 +49,10 @@ Route::get('/jurnal', [JournalController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('journal.index');
 
+Route::get('/jurnal/export', [JournalController::class, 'exportPdf'])
+    ->middleware(['auth', 'verified'])
+    ->name('jurnal.export');
+
 Route::get('/data-siswa', [StudentController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('student.index');
@@ -55,5 +60,13 @@ Route::get('/data-siswa', [StudentController::class, 'index'])
 Route::get('/kalender-pendidikan', [CalendarController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('calendar.index');
+    
+Route::get('/jadwal-mengajar', [TeachingScheduleController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('schedule.index');
+
+Route::get('/jadwal-mengajar/export', [App\Http\Controllers\TeachingScheduleController::class, 'exportPdf'])
+    ->middleware(['auth', 'verified'])
+    ->name('schedule.export');
 
 require __DIR__.'/auth.php';

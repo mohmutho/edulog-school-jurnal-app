@@ -193,6 +193,8 @@ const submitForm = () => {
                                         <SelectItem value="Berdiskusi">Berdiskusi</SelectItem>
                                         <SelectItem value="Ulangan Harian">Ulangan Harian</SelectItem>
                                         <SelectItem value="Pembelajaran Mandiri">Pembelajaran Mandiri</SelectItem>
+                                        <SelectItem value="Penugasan">Penugasan</SelectItem>
+                                        <SelectItem value="Kegiatan Lainnya">Kegiatan Lainnya</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>

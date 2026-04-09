@@ -151,11 +151,12 @@ const getRowClass = (status) => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="Penjelasan Materi">Penjelasan Materi</SelectItem>
-                                        <SelectItem value="Praktek / Praktikum">Praktek / Praktikum</SelectItem>
-                                        <SelectItem value="Ulangan / Ujian">Ulangan / Ujian</SelectItem>
-                                        <SelectItem value="Diskusi Kelompok">Diskusi Kelompok</SelectItem>
+                                        <SelectItem value="Praktikum">Praktikum</SelectItem>
+                                        <SelectItem value="Berdiskusi">Berdiskusi</SelectItem>
+                                        <SelectItem value="Ulangan Harian">Ulangan Harian</SelectItem>
                                         <SelectItem value="Pembelajaran Mandiri">Pembelajaran Mandiri</SelectItem>
-                                        <SelectItem value="Lainnya">Lainnya</SelectItem>
+                                        <SelectItem value="Penugasan">Penugasan</SelectItem>
+                                        <SelectItem value="Kegiatan Lainnya">Kegiatan Lainnya</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
