@@ -1,196 +1,187 @@
 <script setup>
-import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
+import { 
+    LayoutDashboard, 
+    CalendarDays, 
+    BookOpenCheck, 
+    Users, 
+    LogOut, 
+    Menu, 
+    Bell
+} from 'lucide-vue-next';
+//Komponen Shadcn UI
+import { Button } from '@/Components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/Components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetTrigger } from '@/Components/ui/sheet';
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
-const showingNavigationDropdown = ref(false);
+// MENGAMBIL DATA DARI BACKEND (ROUTING)
+const page = usePage();
+const user = computed(() => page.props.auth?.user || { name: 'Guest', role: 'Guest' });
+
+// Menu navigasi disiapkan dalam array agar mudah dilooping
+// Menu navigasi disiapkan dalam array agar mudah dilooping
+const navigation = [
+    { 
+        name: 'Dashboard', 
+        href: route('dashboard'), 
+        icon: LayoutDashboard, 
+        current: route().current('dashboard') 
+    },
+    { 
+        name: 'Jadwal Mengajar', 
+        href: route('schedule.index'), 
+        icon: CalendarDays, 
+        current: route().current('schedule.index') 
+    },
+    { 
+        name: 'Jurnal & Presensi', 
+        href: route('journal.index'), // Arahkan ke route index jurnal
+        icon: BookOpenCheck, 
+        current: route().current('journal.index') || route().current('journal.show') || route().current('journal.edit')
+    },
+    { 
+        name: 'Data Siswa', 
+        href: route('student.index'), 
+        icon: Users, 
+        current: route().current('student.index') 
+    },
+    { 
+        name: 'Kalender Akademik', 
+        href: route('calendar.index'), 
+        icon: CalendarDays, 
+        current: route().current('calendar.index') 
+    },
+];
+
+// LOGIKA HARI & TANGGAL SAJA
+const currentDate = ref('');
+let dateTimer = null;
+
+const updateDate = () => {
+    const now = new Date();
+    // Format: Rabu, 11 Maret 2026
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    currentDate.value = now.toLocaleDateString('id-ID', options);
+};
+
+onMounted(() => {
+    updateDate();
+    dateTimer = setInterval(updateDate, 60000); // Cek perubahan hari setiap 1 menit
+});
+
+onBeforeUnmount(() => {
+    if (dateTimer) clearInterval(dateTimer);
+});
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav
-                class="border-b border-gray-100 bg-white"
-            >
-                <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
-                                </Link>
-                            </div>
+    <div class="min-h-screen bg-slate-50 flex w-full">
+        <aside class="hidden md:flex flex-col w-64 bg-slate-900 text-white fixed inset-y-0 z-50">
+            <div class="h-16 flex items-center px-6 bg-slate-950">
+                <img src="/images/logo_smansa.webp" alt="Logo" class="h-8 w-8 mr-3 object-contain" />
+                <span class="text-lg font-bold tracking-tight">E-Jurnal App</span>
+            </div>
 
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }}
-
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
+            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                <Link 
+                    v-for="item in navigation" 
+                    :key="item.name" 
+                    :href="item.href"
+                    :class="[
+                        item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors'
+                    ]"
                 >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-gray-200 pb-1 pt-4"
-                    >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
-                        </div>
-
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
+                    <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" aria-hidden="true" />
+                    {{ item.name }}
+                </Link>
             </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
+            <div class="p-4 bg-slate-950 flex items-center">
+                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm mr-3">
+                    {{ user.name.charAt(0) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">{{ user.name }}</p>
+                    <p class="text-xs text-slate-400 truncate">{{ user.role }}</p>
+                </div>
+            </div>
+        </aside>
+
+        <div class="md:pl-64 flex flex-col flex-1 min-h-screen">
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-40 shadow-sm">
+                
+                <div class="md:hidden flex items-center">
+                    <Sheet>
+                        <SheetTrigger asChild>
+                            <Button variant="ghost" size="icon" class="-ml-2">
+                                <Menu class="h-6 w-6 text-slate-600" />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent side="left" class="w-64 bg-slate-900 p-0 border-none text-white">
+                            <div class="h-16 flex items-center px-6 bg-slate-950">
+                                <span class="text-lg font-bold">E-Jurnal Menu</span>
+                            </div>
+                            <nav class="px-4 py-6 space-y-1">
+                                <Link v-for="item in navigation" :key="item.name" :href="item.href" class="text-slate-300 hover:bg-slate-800 flex items-center px-3 py-2.5 text-sm font-medium rounded-md">
+                                    <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" />
+                                    {{ item.name }}
+                                </Link>
+                            </nav>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+
+                <div class="flex items-center space-x-4 ml-auto">
+                    <div class="hidden md:flex items-center text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                        {{ currentDate }}
+                    </div>
+                    
+                    <Button variant="ghost" size="icon" class="text-slate-500 hover:text-slate-700">
+                        <Bell class="h-5 w-5" />
+                    </Button>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" class="relative h-8 w-8 rounded-full ml-2 cursor-pointer">
+                                <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold border border-blue-200">
+                                    {{ user.name.charAt(0) }}
+                                </div>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" class="w-56 mt-2">
+                            <DropdownMenuLabel class="font-normal">
+                                <div class="flex flex-col space-y-1">
+                                    <p class="text-sm font-medium leading-none">{{ user.name }}</p>
+                                    <p class="text-xs leading-none text-muted-foreground">{{ user.email }}</p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <Link :href="route('profile.edit')">
+                                <DropdownMenuItem class="cursor-pointer">Pengaturan Akun</DropdownMenuItem>
+                            </Link>
+                            <DropdownMenuSeparator />
+                            <Link :href="route('logout')" method="post" as="button" class="w-full text-left">
+                                <DropdownMenuItem class="text-red-600 cursor-pointer focus:text-red-600 focus:bg-red-50">
+                                    <LogOut class="mr-2 h-4 w-4" />
+                                    <span>Logout</span>
+                                </DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </header>
 
-            <!-- Page Content -->
-            <main>
+            <main class="flex-1 p-4 sm:p-6 lg:p-8">
                 <slot />
             </main>
         </div>
