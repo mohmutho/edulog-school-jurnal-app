@@ -11,36 +11,46 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class JournalController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Ambil parameter filter dari URL (jika ada)
-        $filterMonth = $request->input('month');
-
-        // 2. Query dasar: Ambil Jurnal beserta relasi Jadwal, Mata Pelajaran, dan Kelas
-        $query = Journal::with(['schedule.subject', 'schedule.classroom'])
-            // Filter Keamanan: Hanya jurnal dari jadwal milik guru yang login
+        // 1. Ambil semua jurnal milik guru yang login, urutkan dari yang terbaru
+        // Kita tambahkan relasi 'attendances' agar bisa menghitung jumlah siswa hadir
+        $journalsRaw = Journal::with(['schedule.subject', 'schedule.classroom', 'attendances'])
             ->whereHas('schedule', function ($q) {
                 $q->where('user_id', Auth::id());
+            })
+            ->orderBy('date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        // 2. Kelompokkan berdasarkan Bulan & Tahun menggunakan Carbon
+        $groupedJournals = $journalsRaw->groupBy(function ($journal) {
+            return Carbon::parse($journal->date)->translatedFormat('F Y');
+        });
+
+        // 3. Hitung rekap kehadiran untuk ditampilkan di tabel
+        $groupedJournals->transform(function ($monthGroup) {
+            return $monthGroup->map(function ($journal) {
+                // Berapa yang hadir?
+                $journal->hadir_count = $journal->attendances->where('status', 'hadir')->count();
+                
+                // Berapa total siswa di kelas tersebut? (Total baris presensi)
+                $journal->total_students = $journal->attendances->count();
+                
+                // Berapa yang tidak hadir? (Total - Hadir)
+                $journal->tidak_hadir_count = $journal->total_students - $journal->hadir_count;
+                
+                return $journal;
             });
+        });
 
-        // 3. Terapkan Filter Bulan (jika user memilih bulan di Vue nanti)
-        if ($filterMonth) {
-            $query->whereMonth('date', $filterMonth)
-                  ->whereYear('date', now()->year); // Asumsi tahun ini
-        }
-
-        // 4. Eksekusi Query dengan Pagination (10 data per halaman) dan urutkan dari terbaru
-        $journals = $query->orderBy('date', 'desc')->paginate(10);
-
-        // 5. Lempar data ke Vue
+        // 4. Lempar data (yang kini berbentuk Object per bulan) ke Vue
         return Inertia::render('Journal/Index', [
-            'journals' => $journals,
-            'filters'  => [
-                'month' => $filterMonth,
-            ]
+            'journals' => $groupedJournals,
         ]);
     }
 
@@ -225,5 +235,37 @@ class JournalController extends Controller
         // 4. Kembalikan ke halaman Lihat Presensi
         return redirect()->route('journal.show', $journal->schedule_id)
             ->with('success', 'Jurnal dan Presensi berhasil diperbarui!');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $user = Auth::user();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // 1. Ambil Data Jurnal Berdasarkan Rentang Tanggal
+        $journalsRaw = Journal::with(['schedule.subject', 'schedule.classroom', 'attendances.student'])
+            ->whereHas('schedule', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            })
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderBy('date', 'asc') // Urutkan dari tanggal paling lama ke baru
+            ->orderBy('schedule_id', 'asc')
+            ->get();
+
+        // 2. Kelompokkan Data Berdasarkan Tanggal (Untuk Pemisah Hari di PDF)
+        $groupedJournals = $journalsRaw->groupBy('date');
+
+        // 3. Render ke PDF dengan format Landscape
+        $pdf = Pdf::loadView('pdf.journal-export', [
+            'user' => $user,
+            'groupedJournals' => $groupedJournals,
+            'startDate' => Carbon::parse($startDate)->translatedFormat('d F Y'),
+            'endDate' => Carbon::parse($endDate)->translatedFormat('d F Y')
+        ])->setPaper('A4', 'landscape');
+
+        // 4. Download File
+        $fileName = 'Jurnal_Guru_' . str_replace(' ', '_', $user->name) . '_' . $startDate . '_sd_' . $endDate . '.pdf';
+        return $pdf->download($fileName);
     }
 }
