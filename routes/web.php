@@ -4,69 +4,24 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\JournalController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\CalendarController;
-use App\Http\Controllers\TeachingScheduleController;
-
 
 Route::get('/', function () {
-    return redirect()->route('login');
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-Route::get('/jurnal/create/{schedule}', [JournalController::class, 'create'])
-    ->middleware('auth', 'verified')
-    ->name('jurnal.create');
-
-Route::post('/jurnal/{schedule}', [JournalController::class, 'store'])
-    ->middleware(['auth', 'verified'])
-    ->name('journal.store');
-
-Route::get('/jurnal/{schedule}/show', [JournalController::class, 'show'])
-    ->middleware(['auth', 'verified'])
-    ->name('journal.show');
-
-Route::get('/jurnal/{journal}/edit', [JournalController::class, 'edit'])
-    ->middleware(['auth', 'verified'])
-    ->name('journal.edit');
-
-Route::put('/jurnal/{journal}', [JournalController::class, 'update'])
-    ->middleware(['auth', 'verified'])
-    ->name('journal.update');
-
-Route::get('/jurnal', [JournalController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('journal.index');
-
-Route::get('/jurnal/export', [JournalController::class, 'exportPdf'])
-    ->middleware(['auth', 'verified'])
-    ->name('jurnal.export');
-
-Route::get('/data-siswa', [StudentController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('student.index');
-
-Route::get('/kalender-pendidikan', [CalendarController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('calendar.index');
-    
-Route::get('/jadwal-mengajar', [TeachingScheduleController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('schedule.index');
-
-Route::get('/jadwal-mengajar/export', [App\Http\Controllers\TeachingScheduleController::class, 'exportPdf'])
-    ->middleware(['auth', 'verified'])
-    ->name('schedule.export');
 
 require __DIR__.'/auth.php';
