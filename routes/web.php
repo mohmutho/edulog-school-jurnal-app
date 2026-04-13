@@ -10,6 +10,8 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\Admin\AcademicYearController;
+use App\Http\Controllers\Admin\StudentManagementController;
+use App\Http\Middleware\RoleAdmin;
 
 
 Route::get('/', function () {
@@ -70,12 +72,17 @@ Route::get('/jadwal-mengajar/export', [App\Http\Controllers\TeachingScheduleCont
     ->middleware(['auth', 'verified'])
     ->name('schedule.export');
 
-Route::middleware(['auth', 'admin:admin_kurikulum,administrator'])->prefix('kurikulum')->name('kurikulum.')->group(function () {
+Route::middleware(['auth', RoleAdmin::class.':admin_kurikulum,administrator'])->prefix('kurikulum')->name('kurikulum.')->group(function () {
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic-years.index');
     Route::post('/academic-years', [AcademicYearController::class, 'store'])->name('academic-years.store');
     Route::patch('/academic-years/{id}/activate', [AcademicYearController::class, 'activate'])->name('academic-years.activate');
+
+    Route::get('/students', [StudentManagementController::class, 'index'])->name('students.index');
+    Route::post('/students/assign', [StudentManagementController::class, 'assignClass'])->name('students.assign');
+    Route::post('/students/status', [StudentManagementController::class, 'updateStatus'])->name('students.status');
 });
-Route::middleware(['auth', 'admin:administrator'])->prefix('system')->name('system.')->group(function () {
+
+Route::middleware(['auth', RoleAdmin::class.':administrator'])->prefix('system')->name('system.')->group(function () {
     // Route Manajemen User, Tambah Role, dan Impersonate masuk sini
 });
 

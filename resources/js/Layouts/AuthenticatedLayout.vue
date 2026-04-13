@@ -80,6 +80,12 @@ const menuAdminKurikulum = [
         current: route().current('kurikulum.academic-years.*') 
     },
     { 
+        name: 'Data Siswa', 
+        href: route('kurikulum.students.index'), // <-- Update href ini
+        icon: Users, 
+        current: route().current('kurikulum.students.*') 
+    },
+    { 
         name: 'Master Data', 
         href: '#', 
         icon: Database, 
