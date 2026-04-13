@@ -120,8 +120,17 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+        // 3. MASTER DATA: Akun Admin Kurikulum
+        $adminKurikulum = User::create([
+            'name' => 'Bapak Admin Kurikulum, M.Pd.',
+            'email' => 'kurikulum@sekolah.com',
+            'password' => Hash::make('password'),
+            'role' => 'admin_kurikulum',
+            'gender' => 'L',
+            'email_verified_at' => now(),
+        ]);
 
-        // 3. MASTER DATA: Kelas
+        // 4. MASTER DATA: Kelas
         $kelas1 = Classroom::create(['name' => 'X-1']);
         $kelas2 = Classroom::create(['name' => 'X-2']);
         $kelas3 = Classroom::create(['name' => 'X-3']);
@@ -772,5 +781,6 @@ class DatabaseSeeder extends Seeder
             $siswa53->id => ['academic_year_id' => $academicYear->id],
             $siswa54->id => ['academic_year_id' => $academicYear->id],
         ]);
+        
     }
 }
