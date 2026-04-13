@@ -7,7 +7,11 @@ import {
     Users, 
     LogOut, 
     Menu, 
-    Bell
+    Bell,
+    ShieldCheck,
+    UserCog,
+    Database,
+    CheckSquare
 } from 'lucide-vue-next';
 //Komponen Shadcn UI
 import { Button } from '@/Components/ui/button';
@@ -28,8 +32,7 @@ const page = usePage();
 const user = computed(() => page.props.auth?.user || { name: 'Guest', role: 'Guest' });
 
 // Menu navigasi disiapkan dalam array agar mudah dilooping
-// Menu navigasi disiapkan dalam array agar mudah dilooping
-const navigation = [
+const menuGuru = [
     { 
         name: 'Dashboard', 
         href: route('dashboard'), 
@@ -62,6 +65,68 @@ const navigation = [
     },
 ];
 
+// 2. Menu Admin Kurikulum
+const menuAdminKurikulum = [
+    { 
+        name: 'Dashboard Kurikulum', 
+        href: '#', 
+        icon: LayoutDashboard, 
+        current: false 
+    },
+    { 
+        name: 'Tahun Ajaran', 
+        href: route('kurikulum.academic-years.index'), 
+        icon: CalendarDays, 
+        current: route().current('kurikulum.academic-years.*') 
+    },
+    { 
+        name: 'Master Data', 
+        href: '#', 
+        icon: Database, 
+        current: false 
+    },
+    { 
+        name: 'Plotting Jadwal', 
+        href: '#', 
+        icon: CalendarDays, 
+        current: false 
+    },
+    { 
+        name: 'Monitor Jurnal', 
+        href: '#', 
+        icon: CheckSquare, 
+        current: false 
+    },
+];
+
+// 3. Menu Super Administrator
+const menuAdministrator = [
+    { 
+        name: 'System Dashboard', 
+        href: '#', 
+        icon: LayoutDashboard, 
+        current: false 
+    },
+    { 
+        name: 'Manajemen User & Role', 
+        href: '#', 
+        icon: UserCog, 
+        current: false 
+    },
+    { 
+        name: 'Impersonate Akses', 
+        href: '#', 
+        icon: ShieldCheck, 
+        current: false 
+    },
+];
+
+const activeNavigation = computed(() => {
+    if (user.value.role === 'administrator') return menuAdministrator;
+    if (user.value.role === 'admin_kurikulum') return menuAdminKurikulum;
+    return menuGuru;
+});
+
 // LOGIKA HARI & TANGGAL SAJA
 const currentDate = ref('');
 let dateTimer = null;
@@ -93,7 +158,7 @@ onBeforeUnmount(() => {
 
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
                 <Link 
-                    v-for="item in navigation" 
+                    v-for="item in activeNavigation" 
                     :key="item.name" 
                     :href="item.href"
                     :class="[
@@ -132,7 +197,7 @@ onBeforeUnmount(() => {
                                 <span class="text-lg font-bold">E-Jurnal Menu</span>
                             </div>
                             <nav class="px-4 py-6 space-y-1">
-                                <Link v-for="item in navigation" :key="item.name" :href="item.href" class="text-slate-300 hover:bg-slate-800 flex items-center px-3 py-2.5 text-sm font-medium rounded-md">
+                                <Link v-for="item in activeNavigation" :key="item.name" :href="item.href" class="text-slate-300 hover:bg-slate-800 flex items-center px-3 py-2.5 text-sm font-medium rounded-md">
                                     <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" />
                                     {{ item.name }}
                                 </Link>

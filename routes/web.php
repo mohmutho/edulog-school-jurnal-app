@@ -9,6 +9,7 @@ use App\Http\Controllers\JournalController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\TeachingScheduleController;
+use App\Http\Controllers\Admin\AcademicYearController;
 
 
 Route::get('/', function () {
@@ -68,5 +69,14 @@ Route::get('/jadwal-mengajar', [TeachingScheduleController::class, 'index'])
 Route::get('/jadwal-mengajar/export', [App\Http\Controllers\TeachingScheduleController::class, 'exportPdf'])
     ->middleware(['auth', 'verified'])
     ->name('schedule.export');
+
+Route::middleware(['auth', 'admin:admin_kurikulum,administrator'])->prefix('kurikulum')->name('kurikulum.')->group(function () {
+    Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic-years.index');
+    Route::post('/academic-years', [AcademicYearController::class, 'store'])->name('academic-years.store');
+    Route::patch('/academic-years/{id}/activate', [AcademicYearController::class, 'activate'])->name('academic-years.activate');
+});
+Route::middleware(['auth', 'admin:administrator'])->prefix('system')->name('system.')->group(function () {
+    // Route Manajemen User, Tambah Role, dan Impersonate masuk sini
+});
 
 require __DIR__.'/auth.php';
