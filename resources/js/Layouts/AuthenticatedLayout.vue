@@ -93,9 +93,9 @@ const menuAdminKurikulum = [
     },
     { 
         name: 'Plotting Jadwal', 
-        href: '#', 
+        href: route('kurikulum.schedules.index'), 
         icon: CalendarDays, 
-        current: false 
+        current: route().current('kurikulum.schedules.*') 
     },
     { 
         name: 'Monitor Jurnal', 

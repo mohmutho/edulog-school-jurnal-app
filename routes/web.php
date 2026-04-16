@@ -12,6 +12,7 @@ use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Middleware\RoleAdmin;
+use App\Http\Controllers\Admin\ScheduleController;
 
 
 Route::get('/', function () {
@@ -80,6 +81,10 @@ Route::middleware(['auth', RoleAdmin::class.':admin_kurikulum,administrator'])->
     Route::get('/students', [StudentManagementController::class, 'index'])->name('students.index');
     Route::post('/students/assign', [StudentManagementController::class, 'assignClass'])->name('students.assign');
     Route::post('/students/status', [StudentManagementController::class, 'updateStatus'])->name('students.status');
+
+    Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+    Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
+    Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
 });
 
 Route::middleware(['auth', RoleAdmin::class.':administrator'])->prefix('system')->name('system.')->group(function () {
