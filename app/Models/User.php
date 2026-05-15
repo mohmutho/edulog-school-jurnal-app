@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'gender',
         'whatsapp_number',
+        'is_requesting_password_reset',
     ];
 
     /**

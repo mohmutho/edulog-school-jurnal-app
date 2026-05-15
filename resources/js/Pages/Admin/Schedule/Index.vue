@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Button } from '@/Components/ui/button';
 import { 
     CalendarDays, Plus, Trash2, Clock, 
-    User, BookOpen, AlertCircle, Info, Filter 
+    User, BookOpen, AlertCircle, Info, Filter, Printer 
 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -126,6 +126,9 @@ const getJamKe = (start, end) => {
                     </select>
                 </div>
 
+                <Button variant="outline" class="w-full sm:w-auto bg-white border-slate-200 text-slate-700 hover:bg-slate-50">
+                    <Printer class="w-4 h-4 mr-2" /> Cetak PDF
+                </Button>
                 <Button @click="showAddModal = !showAddModal" class="bg-indigo-600 hover:bg-indigo-700 w-full sm:w-auto">
                     <Plus class="w-4 h-4 mr-2" /> Tambah Jadwal
                 </Button>

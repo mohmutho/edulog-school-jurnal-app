@@ -4,7 +4,7 @@ import { Head, useForm, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import { Button } from '@/Components/ui/button';
-import { Users, MoveRight, Search, AlertTriangle, Filter, UserMinus } from 'lucide-vue-next';
+import { Users, MoveRight, Search, AlertTriangle, Filter, UserMinus, UploadCloud, Download } from 'lucide-vue-next';
 import debounce from 'lodash/debounce';
 
 const props = defineProps({
@@ -71,6 +71,29 @@ const formStatus = useForm({
     status: ''
 });
 
+const showImportModal = ref(false);
+
+const formImport = useForm({
+    file: null,
+    academic_year_id: props.activeYear?.id
+});
+
+const handleImport = () => {
+    formImport.post(route('kurikulum.students.import'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showImportModal.value = false;
+            formImport.reset();
+        }
+    });
+};
+
+const downloadTemplate = () => {
+    const url = new URL(route('kurikulum.students.template'));
+    url.protocol = window.location.protocol;
+    window.location.href = url.toString();
+};
+
 const handleAssign = () => {
     if (!targetClassroom.value) return alert('Silakan pilih kelas tujuan terlebih dahulu!');
     if (!props.activeYear) return alert('Tahun ajaran aktif belum diatur.');
@@ -125,7 +148,10 @@ const handleUpdateStatus = () => {
                         <Users class="w-5 h-5 mr-2 text-indigo-600" /> Data Siswa
                     </CardTitle>
                     
-                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto items-center">
+                        <Button @click="showImportModal = true" class="bg-emerald-600 hover:bg-emerald-700 text-white w-full sm:w-auto font-medium shadow-sm transition-colors whitespace-nowrap">
+                            <UploadCloud class="w-4 h-4 mr-2" /> Import Excel
+                        </Button>
                         <div class="relative w-full sm:w-48">
                             <Filter class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
                             <select v-model="filterClassroom" class="pl-9 w-full border-slate-200 rounded-lg text-sm font-bold text-indigo-900 focus:ring-indigo-500 bg-white">
@@ -220,6 +246,51 @@ const handleUpdateStatus = () => {
                     </div>
                 </CardContent>
             </Card>
+        </div>
+
+        <!-- Import Modal -->
+        <div v-if="showImportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden border border-slate-200">
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/80">
+                    <h3 class="font-bold text-slate-800 flex items-center">
+                        <UploadCloud class="w-5 h-5 mr-2 text-indigo-600" />
+                        Import Data Siswa
+                    </h3>
+                    <button @click="showImportModal = false; formImport.reset()" class="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors">
+                        <span class="text-2xl leading-none">&times;</span>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div class="mb-5 bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+                        <p class="text-sm text-indigo-800 mb-3 leading-relaxed">
+                            Unduh template Excel untuk melihat format kolom yang dibutuhkan. Isi data dengan benar, lalu unggah file tersebut.
+                        </p>
+                        <button type="button" @click.prevent="downloadTemplate" class="inline-flex items-center text-sm font-semibold text-indigo-700 hover:text-indigo-900 bg-white border border-indigo-200 px-3 py-2 rounded-md shadow-sm transition-all hover:shadow focus:outline-none">
+                            <Download class="w-4 h-4 mr-2" /> Download Format Excel
+                        </button>
+                    </div>
+                    
+                    <form @submit.prevent="handleImport">
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">File Excel (.xlsx, .xls, .csv)</label>
+                            <input type="file" @input="formImport.file = $event.target.files[0]" accept=".xlsx,.xls,.csv" class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border border-slate-200 rounded-md file:cursor-pointer transition-all">
+                            <div v-if="formImport.errors.file" class="text-rose-500 text-xs mt-2 font-medium">{{ formImport.errors.file }}</div>
+                        </div>
+                        
+                        <div class="flex justify-end gap-3 pt-2">
+                            <Button type="button" variant="outline" @click="showImportModal = false; formImport.reset()" class="border-slate-200 text-slate-600 hover:bg-slate-50">
+                                Batal
+                            </Button>
+                            <Button type="submit" :disabled="formImport.processing || !formImport.file" class="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[120px]">
+                                <span v-if="formImport.processing" class="flex items-center justify-center">
+                                    <span class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span> Proses...
+                                </span>
+                                <span v-else>Import Data</span>
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </AuthenticatedLayout>
 </template>

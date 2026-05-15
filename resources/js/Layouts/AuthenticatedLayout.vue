@@ -11,7 +11,8 @@ import {
     ShieldCheck,
     UserCog,
     Database,
-    CheckSquare
+    CheckSquare,
+    Key
 } from 'lucide-vue-next';
 //Komponen Shadcn UI
 import { Button } from '@/Components/ui/button';
@@ -89,7 +90,15 @@ const menuAdminKurikulum = [
         name: 'Master Data', 
         href: '#', 
         icon: Database, 
-        current: false 
+        current: false,
+        isTitle: true
+    },
+    { 
+        name: 'Reset Password Guru', 
+        href: route('kurikulum.users-reset.index'), 
+        icon: Key, 
+        current: route().current('kurikulum.users-reset.*'),
+        isChild: true
     },
     { 
         name: 'Plotting Jadwal', 
@@ -166,9 +175,11 @@ onBeforeUnmount(() => {
                 <Link 
                     v-for="item in activeNavigation" 
                     :key="item.name" 
-                    :href="item.href"
+                    :href="item.href || '#'"
                     :class="[
                         item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                        item.isChild ? 'ml-6' : '',
+                        item.isTitle ? 'opacity-70 cursor-default hover:bg-transparent pointer-events-none mt-2' : '',
                         'group flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors'
                     ]"
                 >
@@ -203,7 +214,12 @@ onBeforeUnmount(() => {
                                 <span class="text-lg font-bold">E-Jurnal Menu</span>
                             </div>
                             <nav class="px-4 py-6 space-y-1">
-                                <Link v-for="item in activeNavigation" :key="item.name" :href="item.href" class="text-slate-300 hover:bg-slate-800 flex items-center px-3 py-2.5 text-sm font-medium rounded-md">
+                                <Link v-for="item in activeNavigation" :key="item.name" :href="item.href || '#'" :class="[
+                                    item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                                    item.isChild ? 'ml-6' : '',
+                                    item.isTitle ? 'opacity-70 cursor-default hover:bg-transparent pointer-events-none mt-2' : '',
+                                    'flex items-center px-3 py-2.5 text-sm font-medium rounded-md'
+                                ]">
                                     <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" />
                                     {{ item.name }}
                                 </Link>
