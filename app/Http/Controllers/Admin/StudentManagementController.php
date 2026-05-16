@@ -9,6 +9,12 @@ use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\StudentsImport;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 
 class StudentManagementController extends Controller
 {
@@ -102,5 +108,52 @@ class StudentManagementController extends Controller
         ]);
 
         return redirect()->back();
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+            'academic_year_id' => 'required|exists:academic_years,id',
+        ]);
+
+        Excel::import(
+            new StudentsImport($request->academic_year_id), 
+            $request->file('file')
+        );
+
+        return redirect()->back();
+    }
+
+    public function downloadTemplate()
+    {
+        return Excel::download(new class implements WithHeadings, WithEvents {
+            public function headings(): array
+            {
+                return ['nisn', 'nama_siswa', 'gender', 'kelas'];
+            }
+
+            public function registerEvents(): array
+            {
+                return [
+                    AfterSheet::class => function(AfterSheet $event) {
+                        $validation = $event->sheet->getCell('C2')->getDataValidation();
+                        $validation->setType(DataValidation::TYPE_LIST);
+                        $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
+                        $validation->setAllowBlank(true);
+                        $validation->setShowInputMessage(true);
+                        $validation->setShowErrorMessage(true);
+                        $validation->setShowDropDown(true);
+                        $validation->setErrorTitle('Input error');
+                        $validation->setError('Value is not in list.');
+                        $validation->setPromptTitle('Pick from list');
+                        $validation->setPrompt('Please pick a value from the drop-down list.');
+                        $validation->setFormula1('"L,P"');
+                        
+                        $event->sheet->setDataValidation('C2:C1000', $validation);
+                    },
+                ];
+            }
+        }, 'template_import_siswa.xlsx');
     }
 }

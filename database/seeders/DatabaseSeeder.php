@@ -170,205 +170,205 @@ class DatabaseSeeder extends Seeder
         $mapel20 = Subject::create(['name' => 'Bimbingan Konseling']);
         $mapel21 = Subject::create(['name' => 'Koding dan Kecerdasan Artificial']);
 
-        // 5. MASTER DATA: Jadwal Pelajaran
-        // Jadwal 1: Hari Senin
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru6->id,
-            'classroom_id' => $kelas1->id,
-            'subject_id' => $mapel1->id,
-            'day_of_week' => 1,
-            'start_time' => '07:00:00',
-            'end_time' => '09:15:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru1->id,
-            'classroom_id' => $kelas2->id,
-            'subject_id' => $mapel2->id,
-            'day_of_week' => 1, 
-            'start_time' => '12:30:00',
-            'end_time' => '14:00:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru7->id,
-            'classroom_id' => $kelas3->id,
-            'subject_id' => $mapel14->id,
-            'day_of_week' => 1, 
-            'start_time' => '09:15:00',
-            'end_time' => '11:45:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru4->id,
-            'classroom_id' => $kelas4->id,
-            'subject_id' => $mapel16->id,
-            'day_of_week' => 1, 
-            'start_time' => '12:30:00',
-            'end_time' => '14:00:00',
-        ]);
+        // // 5. MASTER DATA: Jadwal Pelajaran
+        // // Jadwal 1: Hari Senin
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru6->id,
+        //     'classroom_id' => $kelas1->id,
+        //     'subject_id' => $mapel1->id,
+        //     'day_of_week' => 1,
+        //     'start_time' => '07:00:00',
+        //     'end_time' => '09:15:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru1->id,
+        //     'classroom_id' => $kelas2->id,
+        //     'subject_id' => $mapel2->id,
+        //     'day_of_week' => 1, 
+        //     'start_time' => '12:30:00',
+        //     'end_time' => '14:00:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru7->id,
+        //     'classroom_id' => $kelas3->id,
+        //     'subject_id' => $mapel14->id,
+        //     'day_of_week' => 1, 
+        //     'start_time' => '09:15:00',
+        //     'end_time' => '11:45:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru4->id,
+        //     'classroom_id' => $kelas4->id,
+        //     'subject_id' => $mapel16->id,
+        //     'day_of_week' => 1, 
+        //     'start_time' => '12:30:00',
+        //     'end_time' => '14:00:00',
+        // ]);
 
-        // Jadwal 2: Hari Selasa
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru5->id,
-            'classroom_id' => $kelas5->id,
-            'subject_id' => $mapel3->id,
-            'day_of_week' => 2,
-            'start_time' => '07:00:00',
-            'end_time' => '09:15:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru4->id,
-            'classroom_id' => $kelas6->id,
-            'subject_id' => $mapel6->id,
-            'day_of_week' => 2,
-            'start_time' => '10:00:00',
-            'end_time' => '11:45:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru2->id,
-            'classroom_id' => $kelas7->id,
-            'subject_id' => $mapel21->id,
-            'day_of_week' => 2,
-            'start_time' => '12:30:00',
-            'end_time' => '14:00:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru8->id,
-            'classroom_id' => $kelas8->id,
-            'subject_id' => $mapel20->id,
-            'day_of_week' => 2,
-            'start_time' => '14:00:00',
-            'end_time' => '15:30:00',
-        ]);
+        // // Jadwal 2: Hari Selasa
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru5->id,
+        //     'classroom_id' => $kelas5->id,
+        //     'subject_id' => $mapel3->id,
+        //     'day_of_week' => 2,
+        //     'start_time' => '07:00:00',
+        //     'end_time' => '09:15:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru4->id,
+        //     'classroom_id' => $kelas6->id,
+        //     'subject_id' => $mapel6->id,
+        //     'day_of_week' => 2,
+        //     'start_time' => '10:00:00',
+        //     'end_time' => '11:45:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru2->id,
+        //     'classroom_id' => $kelas7->id,
+        //     'subject_id' => $mapel21->id,
+        //     'day_of_week' => 2,
+        //     'start_time' => '12:30:00',
+        //     'end_time' => '14:00:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru8->id,
+        //     'classroom_id' => $kelas8->id,
+        //     'subject_id' => $mapel20->id,
+        //     'day_of_week' => 2,
+        //     'start_time' => '14:00:00',
+        //     'end_time' => '15:30:00',
+        // ]);
 
-        // Jadwal 3: Hari Rabu
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru10->id,
-            'classroom_id' => $kelas9->id,
-            'subject_id' => $mapel18->id,
-            'day_of_week' => 3,
-            'start_time' => '07:00:00',
-            'end_time' => '09:15:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru3->id,
-            'classroom_id' => $kelas10->id,
-            'subject_id' => $mapel7->id,
-            'day_of_week' => 3,
-            'start_time' => '09:15:00',
-            'end_time' => '11:45:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru9->id,
-            'classroom_id' => $kelas11->id,
-            'subject_id' => $mapel11->id,
-            'day_of_week' => 3,
-            'start_time' => '12:30:00',
-            'end_time' => '14:00:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru9->id,
-            'classroom_id' => $kelas12->id,
-            'subject_id' => $mapel11->id,
-            'day_of_week' => 3,
-            'start_time' => '14:00:00',
-            'end_time' => '15:30:00',
-        ]);
+        // // Jadwal 3: Hari Rabu
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru10->id,
+        //     'classroom_id' => $kelas9->id,
+        //     'subject_id' => $mapel18->id,
+        //     'day_of_week' => 3,
+        //     'start_time' => '07:00:00',
+        //     'end_time' => '09:15:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru3->id,
+        //     'classroom_id' => $kelas10->id,
+        //     'subject_id' => $mapel7->id,
+        //     'day_of_week' => 3,
+        //     'start_time' => '09:15:00',
+        //     'end_time' => '11:45:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru9->id,
+        //     'classroom_id' => $kelas11->id,
+        //     'subject_id' => $mapel11->id,
+        //     'day_of_week' => 3,
+        //     'start_time' => '12:30:00',
+        //     'end_time' => '14:00:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru9->id,
+        //     'classroom_id' => $kelas12->id,
+        //     'subject_id' => $mapel11->id,
+        //     'day_of_week' => 3,
+        //     'start_time' => '14:00:00',
+        //     'end_time' => '15:30:00',
+        // ]);
 
-        // Jadwal 4: Hari Kamis 
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru8->id,
-            'classroom_id' => $kelas13->id,
-            'subject_id' => $mapel20->id,
-            'day_of_week' => 4,
-            'start_time' => '07:00:00',
-            'end_time' => '08:30:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru1->id,
-            'classroom_id' => $kelas14->id,
-            'subject_id' => $mapel2->id,
-            'day_of_week' => 4,
-            'start_time' => '08:30:00',
-            'end_time' => '10:00:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru7->id,
-            'classroom_id' => $kelas15->id,
-            'subject_id' => $mapel15->id,
-            'day_of_week' => 4,
-            'start_time' => '10:15:00',
-            'end_time' => '11:45:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru10->id,
-            'classroom_id' => $kelas1->id,
-            'subject_id' => $mapel4->id,
-            'day_of_week' => 4,
-            'start_time' => '12:30:00',
-            'end_time' => '14:00:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru6->id,
-            'classroom_id' => $kelas2->id,
-            'subject_id' => $mapel19->id,
-            'day_of_week' => 4,
-            'start_time' => '14:00:00',
-            'end_time' => '15:30:00',
-        ]);
+        // // Jadwal 4: Hari Kamis 
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru8->id,
+        //     'classroom_id' => $kelas13->id,
+        //     'subject_id' => $mapel20->id,
+        //     'day_of_week' => 4,
+        //     'start_time' => '07:00:00',
+        //     'end_time' => '08:30:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru1->id,
+        //     'classroom_id' => $kelas14->id,
+        //     'subject_id' => $mapel2->id,
+        //     'day_of_week' => 4,
+        //     'start_time' => '08:30:00',
+        //     'end_time' => '10:00:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru7->id,
+        //     'classroom_id' => $kelas15->id,
+        //     'subject_id' => $mapel15->id,
+        //     'day_of_week' => 4,
+        //     'start_time' => '10:15:00',
+        //     'end_time' => '11:45:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru10->id,
+        //     'classroom_id' => $kelas1->id,
+        //     'subject_id' => $mapel4->id,
+        //     'day_of_week' => 4,
+        //     'start_time' => '12:30:00',
+        //     'end_time' => '14:00:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru6->id,
+        //     'classroom_id' => $kelas2->id,
+        //     'subject_id' => $mapel19->id,
+        //     'day_of_week' => 4,
+        //     'start_time' => '14:00:00',
+        //     'end_time' => '15:30:00',
+        // ]);
 
-        // Jadwal 5: Hari Jumat 
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru8->id,
-            'classroom_id' => $kelas3->id,
-            'subject_id' => $mapel20->id,
-            'day_of_week' => 5,
-            'start_time' => '07:00:00',
-            'end_time' => '08:30:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru3->id,
-            'classroom_id' => $kelas4->id,
-            'subject_id' => $mapel7->id,
-            'day_of_week' => 5,
-            'start_time' => '08:30:00',
-            'end_time' => '10:00:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru11->id,
-            'classroom_id' => $kelas5->id,
-            'subject_id' => $mapel5->id,
-            'day_of_week' => 5,
-            'start_time' => '10:15:00',
-            'end_time' => '11:45:00',
-        ]);
-        Schedule::create([
-            'academic_year_id' => $academicYear->id,
-            'user_id' => $guru11->id,
-            'classroom_id' => $kelas2->id,
-            'subject_id' => $mapel5->id,
-            'day_of_week' => 5,
-            'start_time' => '12:30:00',
-            'end_time' => '14:00:00',
-        ]);
+        // // Jadwal 5: Hari Jumat 
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru8->id,
+        //     'classroom_id' => $kelas3->id,
+        //     'subject_id' => $mapel20->id,
+        //     'day_of_week' => 5,
+        //     'start_time' => '07:00:00',
+        //     'end_time' => '08:30:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru3->id,
+        //     'classroom_id' => $kelas4->id,
+        //     'subject_id' => $mapel7->id,
+        //     'day_of_week' => 5,
+        //     'start_time' => '08:30:00',
+        //     'end_time' => '10:00:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru11->id,
+        //     'classroom_id' => $kelas5->id,
+        //     'subject_id' => $mapel5->id,
+        //     'day_of_week' => 5,
+        //     'start_time' => '10:15:00',
+        //     'end_time' => '11:45:00',
+        // ]);
+        // Schedule::create([
+        //     'academic_year_id' => $academicYear->id,
+        //     'user_id' => $guru11->id,
+        //     'classroom_id' => $kelas2->id,
+        //     'subject_id' => $mapel5->id,
+        //     'day_of_week' => 5,
+        //     'start_time' => '12:30:00',
+        //     'end_time' => '14:00:00',
+        // ]);
 
         // 6. MASTER DATA: Siswa
         $siswa1 = Student::create([

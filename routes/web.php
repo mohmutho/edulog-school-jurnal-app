@@ -12,6 +12,8 @@ use App\Http\Controllers\TeachingScheduleController;
 use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Middleware\RoleAdmin;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\UserResetController;
 
 
 Route::get('/', function () {
@@ -80,6 +82,15 @@ Route::middleware(['auth', RoleAdmin::class.':admin_kurikulum,administrator'])->
     Route::get('/students', [StudentManagementController::class, 'index'])->name('students.index');
     Route::post('/students/assign', [StudentManagementController::class, 'assignClass'])->name('students.assign');
     Route::post('/students/status', [StudentManagementController::class, 'updateStatus'])->name('students.status');
+    Route::post('/students/import', [StudentManagementController::class, 'import'])->name('students.import');
+    Route::get('/students/template', [StudentManagementController::class, 'downloadTemplate'])->name('students.template');
+
+    Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+    Route::post('/schedules', [ScheduleController::class, 'store'])->name('schedules.store');
+    Route::delete('/schedules/{schedule}', [ScheduleController::class, 'destroy'])->name('schedules.destroy');
+
+    Route::get('/master-data/users-reset', [UserResetController::class, 'index'])->name('users-reset.index');
+    Route::post('/master-data/users/{user}/reset', [UserResetController::class, 'reset'])->name('users-reset.reset');
 });
 
 Route::middleware(['auth', RoleAdmin::class.':administrator'])->prefix('system')->name('system.')->group(function () {
