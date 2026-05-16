@@ -75,6 +75,7 @@ Route::get('/jadwal-mengajar/export', [App\Http\Controllers\TeachingScheduleCont
     ->name('schedule.export');
 
 Route::middleware(['auth', RoleAdmin::class.':admin_kurikulum,administrator'])->prefix('kurikulum')->name('kurikulum.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic-years.index');
     Route::post('/academic-years', [AcademicYearController::class, 'store'])->name('academic-years.store');
     Route::patch('/academic-years/{id}/activate', [AcademicYearController::class, 'activate'])->name('academic-years.activate');

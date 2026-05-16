@@ -27,6 +27,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/Components/ui/sheet';
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { ChevronDown } from 'lucide-vue-next';
 
 // MENGAMBIL DATA DARI BACKEND (ROUTING)
 const page = usePage();
@@ -70,9 +71,9 @@ const menuGuru = [
 const menuAdminKurikulum = [
     { 
         name: 'Dashboard Kurikulum', 
-        href: '#', 
+        href: route('kurikulum.dashboard'), 
         icon: LayoutDashboard, 
-        current: false 
+        current: route().current('kurikulum.dashboard') 
     },
     { 
         name: 'Tahun Ajaran', 
@@ -91,14 +92,15 @@ const menuAdminKurikulum = [
         href: '#', 
         icon: Database, 
         current: false,
-        isTitle: true
-    },
-    { 
-        name: 'Reset Password Guru', 
-        href: route('kurikulum.users-reset.index'), 
-        icon: Key, 
-        current: route().current('kurikulum.users-reset.*'),
-        isChild: true
+        isAccordion: true,
+        children: [
+            {
+                name: 'Reset Password Guru', 
+                href: route('kurikulum.users-reset.index'), 
+                icon: Key, 
+                current: route().current('kurikulum.users-reset.*')
+            }
+        ]
     },
     { 
         name: 'Plotting Jadwal', 
@@ -113,6 +115,11 @@ const menuAdminKurikulum = [
         current: false 
     },
 ];
+
+const isMasterDataExpanded = ref(route().current('kurikulum.users-reset.*'));
+const toggleMasterData = () => {
+    isMasterDataExpanded.value = !isMasterDataExpanded.value;
+};
 
 // 3. Menu Super Administrator
 const menuAdministrator = [
@@ -172,20 +179,60 @@ onBeforeUnmount(() => {
             </div>
 
             <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                <Link 
-                    v-for="item in activeNavigation" 
-                    :key="item.name" 
-                    :href="item.href || '#'"
-                    :class="[
-                        item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-                        item.isChild ? 'ml-6' : '',
-                        item.isTitle ? 'opacity-70 cursor-default hover:bg-transparent pointer-events-none mt-2' : '',
-                        'group flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors'
-                    ]"
-                >
-                    <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" aria-hidden="true" />
-                    {{ item.name }}
-                </Link>
+                <template v-for="item in activeNavigation" :key="item.name">
+                    
+                    <!-- If item is Accordion -->
+                    <div v-if="item.isAccordion" class="mt-2">
+                        <button 
+                            @click="toggleMasterData"
+                            class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        >
+                            <div class="flex items-center">
+                                <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" aria-hidden="true" />
+                                {{ item.name }}
+                            </div>
+                            <ChevronDown 
+                                :class="[
+                                    'h-4 w-4 transition-transform duration-300', 
+                                    isMasterDataExpanded ? 'rotate-180' : ''
+                                ]" 
+                            />
+                        </button>
+                        
+                        <!-- Accordion Children -->
+                        <div 
+                            v-show="isMasterDataExpanded"
+                            class="mt-1 space-y-1 overflow-hidden transition-all duration-300"
+                        >
+                            <Link 
+                                v-for="child in item.children" 
+                                :key="child.name" 
+                                :href="child.href || '#'"
+                                :class="[
+                                    child.current ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-slate-800 hover:text-white',
+                                    'ml-8 flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors'
+                                ]"
+                            >
+                                <component :is="child.icon" class="mr-3 h-4 w-4 shrink-0" aria-hidden="true" />
+                                {{ child.name }}
+                            </Link>
+                        </div>
+                    </div>
+
+                    <!-- Normal Menu Item -->
+                    <Link 
+                        v-else
+                        :href="item.href || '#'"
+                        :class="[
+                            item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                            item.isTitle ? 'opacity-70 cursor-default hover:bg-transparent pointer-events-none mt-2' : '',
+                            'group flex items-center px-3 py-2.5 text-sm font-medium rounded-md transition-colors'
+                        ]"
+                    >
+                        <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" aria-hidden="true" />
+                        {{ item.name }}
+                    </Link>
+                </template>
             </nav>
 
             <div class="p-4 bg-slate-950 flex items-center">
@@ -214,15 +261,40 @@ onBeforeUnmount(() => {
                                 <span class="text-lg font-bold">E-Jurnal Menu</span>
                             </div>
                             <nav class="px-4 py-6 space-y-1">
-                                <Link v-for="item in activeNavigation" :key="item.name" :href="item.href || '#'" :class="[
-                                    item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
-                                    item.isChild ? 'ml-6' : '',
-                                    item.isTitle ? 'opacity-70 cursor-default hover:bg-transparent pointer-events-none mt-2' : '',
-                                    'flex items-center px-3 py-2.5 text-sm font-medium rounded-md'
-                                ]">
-                                    <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" />
-                                    {{ item.name }}
-                                </Link>
+                                <template v-for="item in activeNavigation" :key="item.name">
+                                    <div v-if="item.isAccordion" class="mt-2">
+                                        <button 
+                                            @click="toggleMasterData"
+                                            class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-md text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                                        >
+                                            <div class="flex items-center">
+                                                <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" />
+                                                {{ item.name }}
+                                            </div>
+                                            <ChevronDown :class="['h-4 w-4 transition-transform duration-300', isMasterDataExpanded ? 'rotate-180' : '']" />
+                                        </button>
+                                        <div v-show="isMasterDataExpanded" class="mt-1 space-y-1">
+                                            <Link 
+                                                v-for="child in item.children" :key="child.name" :href="child.href || '#'"
+                                                :class="[
+                                                    child.current ? 'bg-blue-600/20 text-blue-400' : 'text-slate-400 hover:bg-slate-800 hover:text-white',
+                                                    'ml-8 flex items-center px-3 py-2 text-sm font-medium rounded-md'
+                                                ]"
+                                            >
+                                                <component :is="child.icon" class="mr-3 h-4 w-4 shrink-0" />
+                                                {{ child.name }}
+                                            </Link>
+                                        </div>
+                                    </div>
+                                    <Link v-else :href="item.href || '#'" :class="[
+                                        item.current ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+                                        item.isTitle ? 'opacity-70 cursor-default hover:bg-transparent pointer-events-none mt-2' : '',
+                                        'flex items-center px-3 py-2.5 text-sm font-medium rounded-md'
+                                    ]">
+                                        <component :is="item.icon" class="mr-3 h-5 w-5 shrink-0" />
+                                        {{ item.name }}
+                                    </Link>
+                                </template>
                             </nav>
                         </SheetContent>
                     </Sheet>
