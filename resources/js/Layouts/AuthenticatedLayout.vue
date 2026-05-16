@@ -12,7 +12,8 @@ import {
     UserCog,
     Database,
     CheckSquare,
-    Key
+    Key,
+    BookOpen
 } from 'lucide-vue-next';
 //Komponen Shadcn UI
 import { Button } from '@/Components/ui/button';
@@ -99,6 +100,12 @@ const menuAdminKurikulum = [
                 href: route('kurikulum.users-reset.index'), 
                 icon: Key, 
                 current: route().current('kurikulum.users-reset.*')
+            },
+            {
+                name: 'Mata Pelajaran', 
+                href: route('kurikulum.subjects.index'), 
+                icon: BookOpen, 
+                current: route().current('kurikulum.subjects.*')
             }
         ]
     },

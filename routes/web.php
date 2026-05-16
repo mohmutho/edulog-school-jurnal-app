@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Middleware\RoleAdmin;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\UserResetController;
+use App\Http\Controllers\Admin\SubjectController;
 
 
 Route::get('/', function () {
@@ -92,6 +93,11 @@ Route::middleware(['auth', RoleAdmin::class.':admin_kurikulum,administrator'])->
 
     Route::get('/master-data/users-reset', [UserResetController::class, 'index'])->name('users-reset.index');
     Route::post('/master-data/users/{user}/reset', [UserResetController::class, 'reset'])->name('users-reset.reset');
+
+    Route::post('/subjects/import', [SubjectController::class, 'import'])->name('subjects.import');
+    Route::get('/subjects/template', [SubjectController::class, 'downloadTemplate'])->name('subjects.template');
+    Route::post('/subjects/{subject}/assign', [SubjectController::class, 'assignTeachers'])->name('subjects.assign');
+    Route::resource('subjects', SubjectController::class)->except(['create', 'show', 'edit']);
 });
 
 Route::middleware(['auth', RoleAdmin::class.':administrator'])->prefix('system')->name('system.')->group(function () {
